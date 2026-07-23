@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>能源/區域維護</h1>
+
+<section class="panel">
+    <h2>新增能源種類</h2>
+    <form method="post" class="form-row">
+        <input type="hidden" name="action" value="add_energy">
+        <div>
+            <label for="energy-name">能源種類</label>
+            <input id="energy-name" name="name" placeholder="例如：水(in-自來水)" required>
+        </div>
+        <div>
+            <label for="energy-unit">單位</label>
+            <input id="energy-unit" name="unit" placeholder="例如：公噸" required>
+        </div>
+        <div>
+            <button type="submit">新增能源種類</button>
+        </div>
+    </form>
+</section>
+
+<section class="panel">
+    <h2>新增區域</h2>
+    <form method="post" class="form-row">
+        <input type="hidden" name="action" value="add_area">
+        <div>
+            <label for="area-name">區域名稱</label>
+            <input id="area-name" name="name" placeholder="例如：Poly 51" required>
+        </div>
+        <div>
+            <button type="submit">新增區域</button>
+        </div>
+    </form>
+</section>
+
+<section class="panel">
+    <h2>目前能源種類</h2>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>排序</th><th>能源種類</th><th>單位</th></tr>
+            </thead>
+            <tbody>
+                {% for energy_type in energy_types %}
+                    <tr>
+                        <td>{{ energy_type.display_order }}</td>
+                        <td>{{ energy_type.name }}</td>
+                        <td>{{ energy_type.unit }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="panel">
+    <h2>目前區域</h2>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>排序</th><th>區域</th></tr>
+            </thead>
+            <tbody>
+                {% for area in areas %}
+                    <tr>
+                        <td>{{ area.display_order }}</td>
+                        <td>{{ area.name }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

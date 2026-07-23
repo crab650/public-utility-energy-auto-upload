@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Excel 多格貼上測試</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <strong>能源資料填報系統｜Excel 貼上測試</strong>
+    </header>
+
+    <main>
+        <h1>能源資料輸入</h1>
+        <section class="panel instructions">
+            <h2>操作方式</h2>
+            <ol>
+                <li>在 Excel 複製一個只包含數值的矩形範圍。</li>
+                <li>點選下方表格要開始填入的第一格。</li>
+                <li>按 <kbd>Ctrl</kbd> + <kbd>V</kbd>，資料會依列、欄填入。</li>
+            </ol>
+            <p>此頁只供測試，不會送出或儲存任何資料。</p>
+        </section>
+
+        <section class="panel toolbar">
+            <div>
+                <label for="report-month">填報月份</label>
+                <input id="report-month" type="month" value="2026-07">
+            </div>
+            <div class="actions">
+                <button id="sample-button" type="button">填入範例</button>
+                <button id="clear-button" type="button">全部清除</button>
+            </div>
+        </section>
+
+        <div id="message" class="message info" role="status" aria-live="polite">
+            請從 Excel 複製資料，然後點選任一數字欄位貼上。
+        </div>
+
+        <section class="panel table-wrap">
+            <table id="fill-table">
+                <thead>
+                    <tr>
+                        <th class="row-head" rowspan="2">能源種類 / 單位</th>
+                        <th colspan="2">總公司</th>
+                        <th colspan="2">第一廠區</th>
+                        <th colspan="2">第二廠區</th>
+                    </tr>
+                    <tr>
+                        <th>數量</th><th>金額（未稅）</th>
+                        <th>數量</th><th>金額（未稅）</th>
+                        <th>數量</th><th>金額（未稅）</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><th class="row-head">電力<br><small>kWh</small></th></tr>
+                    <tr><th class="row-head">自來水<br><small>度</small></th></tr>
+                    <tr><th class="row-head">天然氣<br><small>m³</small></th></tr>
+                    <tr><th class="row-head">柴油<br><small>公升</small></th></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <button id="submit-button" class="primary" type="button">模擬送出填報資料</button>
+    </main>
+    <script src="app.js"></script>
+</body>
+</html>

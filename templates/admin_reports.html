@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>填報查詢</h1>
+
+<section class="panel">
+    <form method="get" class="form-row">
+        <div>
+            <label for="report_month">填報月份</label>
+            <input id="report_month" name="report_month" type="month" value="{{ report_month }}">
+        </div>
+        <div>
+            <button class="secondary" type="submit">查詢</button>
+        </div>
+    </form>
+</section>
+
+<section class="panel table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>月份</th>
+                <th>填寫員</th>
+                <th>能源種類</th>
+                <th>單位</th>
+                <th>區域</th>
+                <th>數量</th>
+                <th>金額(未稅)</th>
+                <th>送出時間</th>
+                <th>更新時間</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+                <tr>
+                    <td>{{ row.report_month }}</td>
+                    <td>{{ row.display_name }}</td>
+                    <td>{{ row.energy_name }}</td>
+                    <td>{{ row.unit }}</td>
+                    <td>{{ row.area_name }}</td>
+                    <td>{{ row.quantity if row.quantity is not none else '' }}</td>
+                    <td>{{ row.amount if row.amount is not none else '' }}</td>
+                    <td>{{ row.submitted_at or '' }}</td>
+                    <td>{{ row.updated_at }}</td>
+                </tr>
+            {% else %}
+                <tr><td colspan="9" class="muted">此月份尚無填報資料。</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

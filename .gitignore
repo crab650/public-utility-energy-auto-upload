@@ -1,0 +1,15 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Flask instance folder (contains databases)
+instance/*.db
+
+# Agents folder
+.agents/
+
+# IDE files
+.vscode/
+.idea/

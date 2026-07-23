@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="panel login-box">
+    <h1>登入</h1>
+    <form method="post">
+        <div style="margin-bottom: 12px;">
+            <label for="username">帳號</label>
+            <input id="username" name="username" autocomplete="username" required>
+        </div>
+        <div style="margin-bottom: 16px;">
+            <label for="password">密碼</label>
+            <input id="password" name="password" type="password" autocomplete="current-password" required>
+        </div>
+        <button type="submit">登入</button>
+    </form>
+    <p class="muted">管理者預設帳號：admin / 1234</p>
+</div>
+{% endblock %}

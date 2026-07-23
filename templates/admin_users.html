@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>填寫員管理</h1>
+
+<section class="panel">
+    <h2>新增填寫員</h2>
+    <form method="post" class="form-row">
+        <div>
+            <label for="username">帳號</label>
+            <input id="username" name="username" required>
+        </div>
+        <div>
+            <label for="password">密碼</label>
+            <input id="password" name="password" required>
+        </div>
+        <div>
+            <label for="display_name">顯示名稱</label>
+            <input id="display_name" name="display_name">
+        </div>
+        <div>
+            <button type="submit">建立</button>
+        </div>
+    </form>
+</section>
+
+{% for user in users %}
+    <section class="panel">
+        <h2>{{ user.display_name }} <span class="muted">({{ user.username }})</span></h2>
+        <form method="post" action="{{ url_for('update_user_permissions', user_id=user.id) }}">
+            <h3>可填寫能源種類</h3>
+            <div class="checkbox-list">
+                {% for energy_type in energy_types %}
+                    <label class="checkbox-item">
+                        <input
+                            type="checkbox"
+                            name="energy_type_ids"
+                            value="{{ energy_type.id }}"
+                            {% if energy_type.id|string in permissions.get(user.id, []) %}checked{% endif %}
+                        >
+                        {{ energy_type.name }} / {{ energy_type.unit }}
+                    </label>
+                {% endfor %}
+            </div>
+            <div style="margin-top: 14px;">
+                <button type="submit">儲存權限</button>
+            </div>
+        </form>
+        <form method="post" action="{{ url_for('reset_user_password', user_id=user.id) }}" class="form-row" style="margin-top: 16px;">
+            <div>
+                <label for="password-{{ user.id }}">重設密碼</label>
+                <input id="password-{{ user.id }}" name="new_password" placeholder="輸入新密碼" required>
+            </div>
+            <div>
+                <button class="secondary" type="submit">重設密碼</button>
+            </div>
+        </form>
+    </section>
+{% else %}
+    <div class="panel muted">尚未建立填寫員。</div>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-heading">
+    <div>
+        <h1>能源分析看板</h1>
+        <p class="muted">掌握各月份能源費用、填報進度與主要成本分布。</p>
+    </div>
+    <form method="get" class="month-picker">
+        <label for="report_month">分析月份</label>
+        <div class="month-picker-controls">
+            <input id="report_month" name="report_month" type="month" value="{{ report_month }}" required>
+            <button type="submit">更新</button>
+        </div>
+    </form>
+</div>
+
+<div class="dashboard-kpis">
+    <div class="kpi-card primary-card">
+        <span class="kpi-label">{{ report_month }} 能源總金額（未稅）</span>
+        <strong>NT$ {{ "{:,.0f}".format(current_amount) }}</strong>
+        <small>{{ valid_entries }} 筆有效填報資料</small>
+    </div>
+    <div class="kpi-card">
+        <span class="kpi-label">較 {{ previous_month }} 增減</span>
+        {% if month_change is not none %}
+            <strong class="{{ 'trend-up' if month_change > 0 else 'trend-down' if month_change < 0 else '' }}">
+                {{ "+" if month_change > 0 else "" }}{{ "{:.1f}".format(month_change) }}%
+            </strong>
+            <small>上月 NT$ {{ "{:,.0f}".format(previous_amount) }}</small>
+        {% else %}
+            <strong>—</strong>
+            <small>上月沒有可比較資料</small>
+        {% endif %}
+    </div>
+    <div class="kpi-card">
+        <span class="kpi-label">已填報人數</span>
+        <strong>{{ submitted_fillers }} / {{ active_fillers }}</strong>
+        <small>依有效填寫員帳號計算</small>
+    </div>
+    <div class="kpi-card {{ 'attention-card' if pending_fillers else '' }}">
+        <span class="kpi-label">尚未填報人數</span>
+        <strong>{{ pending_fillers }}</strong>
+        <small>{{ "仍需追蹤填報進度" if pending_fillers else "本月皆已完成送出" }}</small>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <section class="panel dashboard-panel trend-panel">
+        <div class="panel-title">
+            <div><h2>每月能源費用趨勢</h2><span class="muted">最近 12 個有資料的月份</span></div>
+        </div>
+        {% if monthly_trend %}
+            <div class="trend-chart" aria-label="每月能源費用趨勢圖">
+                {% for item in monthly_trend %}
+                    <div class="trend-column {{ 'selected' if item.selected else '' }}">
+                        <div class="trend-value">{{ "{:,.0f}".format(item.amount / 10000) }}萬</div>
+                        <div class="trend-track"><div class="trend-bar" style="height: {{ item.percent }}%"></div></div>
+                        <div class="trend-month">{{ item.month[2:] }}</div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">目前尚無趨勢資料。</div>
+        {% endif %}
+    </section>
+
+    <section class="panel dashboard-panel">
+        <div class="panel-title"><div><h2>能源費用占比</h2><span class="muted">{{ report_month }}，依未稅金額排序</span></div></div>
+        {% if energy_breakdown %}
+            <div class="ranking-list compact-list">
+                {% for item in energy_breakdown %}
+                    <div class="ranking-item">
+                        <div class="ranking-head">
+                            <span title="{{ item.name }}">{{ item.name }}</span>
+                            <strong>{{ "{:.1f}".format(item.percent) }}%</strong>
+                        </div>
+                        <div class="bar-track"><div class="bar-fill energy-fill" style="width: {{ item.percent }}%"></div></div>
+                        <div class="ranking-amount">NT$ {{ "{:,.0f}".format(item.amount) }}</div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">此月份尚無能源金額資料。</div>
+        {% endif %}
+    </section>
+
+    <section class="panel dashboard-panel area-panel">
+        <div class="panel-title"><div><h2>各區域費用排名</h2><span class="muted">{{ report_month }}，含占當月總費用比例</span></div></div>
+        {% if area_ranking %}
+            <div class="area-ranking">
+                {% for item in area_ranking %}
+                    <div class="area-row">
+                        <span class="rank-number">{{ loop.index }}</span>
+                        <span class="area-name">{{ item.name }}</span>
+                        <div class="bar-track"><div class="bar-fill" style="width: {{ item.percent }}%"></div></div>
+                        <strong>NT$ {{ "{:,.0f}".format(item.amount) }}</strong>
+                        <span class="share">{{ "{:.1f}".format(item.share) }}%</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">目前尚未設定區域。</div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

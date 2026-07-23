@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>能源資料輸入</h1>
+
+<section class="panel">
+    <form method="get" class="form-row">
+        <div>
+            <label for="report_month">填報月份</label>
+            <input id="report_month" name="report_month" type="month" value="{{ report_month }}" required>
+        </div>
+        <div>
+            <button class="secondary" type="submit">切換月份</button>
+        </div>
+    </form>
+</section>
+
+<section class="panel">
+    <h2>{{ report_month }} 填報資料</h2>
+    {% if is_submitted %}
+        <p class="muted">此月份資料已於 {{ submitted_at }} 送出。若需修正，可編輯後重新送出。</p>
+    {% else %}
+        <p class="muted">請填寫所選月份資料。按下送出後，資料會交給管理者查詢；之後仍可修正並重新送出。</p>
+    {% endif %}
+</section>
+
+{% if not energy_types %}
+    <div class="panel muted">目前尚未被指派可填寫的能源種類，請洽管理者設定。</div>
+{% else %}
+    <form method="post">
+        <input type="hidden" name="report_month" value="{{ report_month }}">
+        <div class="panel table-wrap">
+            <table class="fill-table">
+                <thead>
+                    <tr>
+                        <th class="row-head" rowspan="2">能源種類 / 單位</th>
+                        {% for area in areas %}
+                            <th colspan="2">{{ area.name }}</th>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        {% for area in areas %}
+                            <th>數量</th>
+                            <th>金額(未稅)</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for energy_type in energy_types %}
+                        <tr>
+                            <th class="row-head">{{ energy_type.name }}<br><span class="muted">{{ energy_type.unit }}</span></th>
+                            {% for area in areas %}
+                                {% set entry = entries.get((energy_type.id, area.id)) %}
+                                <td>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        name="quantity_{{ energy_type.id }}_{{ area.id }}"
+                                        value="{{ entry.quantity if entry and entry.quantity is not none else '' }}"
+                                    >
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        name="amount_{{ energy_type.id }}_{{ area.id }}"
+                                        value="{{ entry.amount if entry and entry.amount is not none else '' }}"
+                                    >
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <button type="submit">{{ "重新送出填報資料" if is_submitted else "送出填報資料" }}</button>
+    </form>
+{% endif %}
+{% endblock %}
