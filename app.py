@@ -162,10 +162,18 @@ VI_TRANSLATIONS = {
     "區域已新增。": "Đã thêm khu vực.",
     "區域已存在。": "Khu vực đã tồn tại.",
     "填報月份格式不正確。": "Định dạng tháng khai báo không hợp lệ.",
-    "目前尚未被指派可填寫的能源種類或單位，無法送出。": "Chưa được cấp quyền loại năng lượng hoặc đơn vị nên không thể gửi.",
     "能源資料已送出。若需修正，可再次編輯後重新送出。": "Dữ liệu năng lượng đã được gửi. Nếu cần sửa, hãy chỉnh sửa và gửi lại.",
     "能源填報資料": "Dữ liệu khai báo năng lượng",
     "年": "Năm",
+    "備份資料庫": "Sao lưu cơ sở dữ liệu",
+    "系統日誌": "Nhật ký hệ thống",
+    "時間": "Thời gian",
+    "人員": "Nhân viên",
+    "動作": "Hành động",
+    "詳細內容": "Chi tiết",
+    "重新計算偏離值範圍：": "Tính lại phạm vi độ lệch:",
+    "重新計算全部項目": "Tính lại tất cả các mục",
+    "資料庫備份成功。": "Sao lưu cơ sở dữ liệu thành công.",
 }
 
 
@@ -374,6 +382,16 @@ def init_db() -> None:
             FOREIGN KEY (energy_type_id) REFERENCES energy_types(id),
             FOREIGN KEY (area_id) REFERENCES areas(id)
         );
+
+        CREATE TABLE IF NOT EXISTS audit_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            username TEXT,
+            action TEXT NOT NULL,
+            details TEXT,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        );
         """
     )
     if "viewer" not in {
@@ -397,7 +415,7 @@ def init_db() -> None:
     db.commit()
 
 
-def seed_control_limits(db: sqlite3.Connection, replace: bool = False) -> None:
+def seed_control_limits(db: sqlite3.Connection, replace: bool = False, percentage: float = 0.1) -> None:
     if replace:
         db.execute("DELETE FROM control_limits")
     db.execute(
@@ -421,20 +439,35 @@ def seed_control_limits(db: sqlite3.Connection, replace: bool = False) -> None:
             a.id,
             CASE WHEN av.quantity_average IS NULL THEN 0 ELSE 1 END,
             av.quantity_average,
-            av.quantity_average - ABS(av.quantity_average) * 0.1,
-            av.quantity_average + ABS(av.quantity_average) * 0.1,
+            av.quantity_average - ABS(av.quantity_average) * ?,
+            av.quantity_average + ABS(av.quantity_average) * ?,
             CASE WHEN av.amount_average IS NULL THEN 0 ELSE 1 END,
             av.amount_average,
-            av.amount_average - ABS(av.amount_average) * 0.1,
-            av.amount_average + ABS(av.amount_average) * 0.1
+            av.amount_average - ABS(av.amount_average) * ?,
+            av.amount_average + ABS(av.amount_average) * ?
         FROM energy_types et
         CROSS JOIN areas a
         LEFT JOIN averages av
             ON av.energy_type_id = et.id
             AND av.area_id = a.id
         WHERE et.active = 1 AND a.active = 1
-        """
+        """,
+        (percentage, percentage, percentage, percentage),
     )
+
+
+def log_action(action: str, details: str = None) -> None:
+    try:
+        db = get_db()
+        user_id = session.get("user_id")
+        username = session.get("username", "system")
+        db.execute(
+            "INSERT INTO audit_logs (user_id, username, action, details) VALUES (?, ?, ?, ?)",
+            (user_id, username, action, details),
+        )
+        db.commit()
+    except Exception:
+        pass
 
 
 def seed_defaults(db: sqlite3.Connection) -> None:
@@ -557,6 +590,7 @@ def login():
             session["display_name"] = user["display_name"]
             session["role"] = "viewer" if user["viewer"] else user["role"]
             flash("登入成功。", "success")
+            log_action("login", f"Successful login from role: {session['role']}")
             return redirect(url_for("index"))
 
         flash("帳號或密碼錯誤。", "danger")
@@ -566,6 +600,7 @@ def login():
 
 @app.route("/logout", methods=["POST"])
 def logout():
+    log_action("logout")
     language = session.get("language", "zh-TW")
     session.clear()
     session["language"] = language
@@ -704,7 +739,26 @@ def admin_dashboard():
         monthly_trend=monthly_trend,
         energy_breakdown=energy_breakdown,
         area_ranking=area_ranking,
+        audit_logs=db.execute("SELECT * FROM audit_logs ORDER BY id DESC LIMIT 15").fetchall(),
     )
+
+
+@app.route("/admin/backup", methods=["GET"])
+def admin_backup():
+    guard = admin_required()
+    if guard:
+        return guard
+    try:
+        log_action("backup_db", "Downloaded database backup")
+        return send_file(
+            DB_PATH,
+            as_attachment=True,
+            download_name=f"energy_system_backup_{date.today().strftime('%Y%m%d')}.db",
+            mimetype="application/x-sqlite3"
+        )
+    except Exception as e:
+        flash(f"備份失敗: {str(e)}", "danger")
+        return redirect(url_for("admin_dashboard"))
 
 
 @app.route("/admin/users", methods=["GET", "POST"])
@@ -745,6 +799,7 @@ def admin_users():
                         (user_id,),
                     )
                 db.commit()
+                log_action("create_user", f"Created account {username} as {account_type}")
                 flash("填寫員已建立。", "success")
             except sqlite3.IntegrityError:
                 flash("帳號已存在。", "danger")
@@ -821,6 +876,7 @@ def update_user_permissions(user_id: int):
         [(user_id, area_id) for area_id in selected_area_ids],
     )
     db.commit()
+    log_action("update_permissions", f"Updated Y/X permissions for filler: {user['username']}")
     flash("填寫權限已更新。", "success")
     return redirect(url_for("admin_users"))
 
@@ -846,6 +902,7 @@ def reset_user_password(user_id: int):
     )
     get_db().commit()
     if result.rowcount:
+        log_action("reset_password", f"Reset password for filler ID: {user_id}")
         flash("密碼已重設。", "success")
     else:
         flash("找不到填寫員。", "warning")
@@ -873,6 +930,7 @@ def admin_settings():
                     (name, unit, next_order),
                 )
                 db.commit()
+                log_action("add_energy_type", f"Added: {name} (Unit: {unit})")
                 flash("能源種類已新增。", "success")
             except sqlite3.IntegrityError:
                 flash("能源種類已存在。", "danger")
@@ -890,6 +948,7 @@ def admin_settings():
                     (name, next_order),
                 )
                 db.commit()
+                log_action("add_area", f"Added area: {name}")
                 flash("區域已新增。", "success")
             except sqlite3.IntegrityError:
                 flash("區域已存在。", "danger")
@@ -910,8 +969,14 @@ def admin_control_limits():
 
     db = get_db()
     if request.method == "POST" and request.form.get("action") == "recalculate":
-        seed_control_limits(db, replace=True)
+        pct_val = request.form.get("percentage", "10")
+        try:
+            percentage = float(pct_val) / 100.0
+        except ValueError:
+            percentage = 0.1
+        seed_control_limits(db, replace=True, percentage=percentage)
         db.commit()
+        log_action("recalculate_control_limits", f"Recalculated with deviation ±{pct_val}%")
         flash("管制值已依歷史平均值重新計算。", "success")
         return redirect(url_for("admin_control_limits"))
 
@@ -961,6 +1026,7 @@ def admin_control_limits():
             updates,
         )
         db.commit()
+        log_action("update_control_limits", "Manually updated control limit grid")
         flash("管制值已更新。", "success")
         return redirect(url_for("admin_control_limits"))
 
@@ -1092,6 +1158,7 @@ def fill_report():
             (report_month, user_id),
         )
         db.commit()
+        log_action("submit_report", f"Submitted data for {report_month} (Warnings: {control_warning_count})")
         flash(f"{report_month} 能源資料已送出。若需修正，可再次編輯後重新送出。", "success")
         if control_warning_count:
             flash(f"{control_warning_count} 筆資料超出管制範圍，仍可送出。", "warning")

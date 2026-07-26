@@ -6,13 +6,18 @@
         <h1>能源分析看板</h1>
         <p class="muted">掌握各月份能源費用、填報進度與主要成本分布。</p>
     </div>
-    <form method="get" class="month-picker">
-        <label for="report_month">分析月份</label>
-        <div class="month-picker-controls">
-            <input id="report_month" name="report_month" type="month" value="{{ report_month }}" required>
-            <button type="submit">更新</button>
+    <div style="display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap;">
+        <form method="get" class="month-picker" style="margin: 0;">
+            <label for="report_month">分析月份</label>
+            <div class="month-picker-controls">
+                <input id="report_month" name="report_month" type="month" value="{{ report_month }}" required>
+                <button type="submit">更新</button>
+            </div>
+        </form>
+        <div>
+            <a href="{{ url_for('admin_backup') }}" class="button secondary" style="min-height: 38px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; font-weight: bold; border: 2px solid; border-color: var(--highlight) var(--shadow) var(--shadow) var(--highlight); padding: 8px 14px;">備份資料庫</a>
         </div>
-    </form>
+    </div>
 </div>
 
 <div class="dashboard-kpis">
@@ -104,4 +109,39 @@
         {% endif %}
     </section>
 </div>
+
+<section class="panel dashboard-panel area-panel" style="margin-top: 18px;">
+    <div class="panel-title">
+        <div>
+            <h2>系統日誌</h2>
+            <span class="muted">最近 15 筆系統操作記錄</span>
+        </div>
+    </div>
+    <div class="table-wrap">
+        <table style="font-size: 12px; width: 100%;">
+            <thead>
+                <tr>
+                    <th style="width: 150px;">時間</th>
+                    <th style="width: 100px;">人員</th>
+                    <th style="width: 150px;">動作</th>
+                    <th>詳細內容</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in audit_logs %}
+                    <tr>
+                        <td>{{ log.created_at }}</td>
+                        <td>{{ log.username }}</td>
+                        <td>{{ log.action }}</td>
+                        <td>{{ log.details or '' }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="empty-state" style="padding: 15px; text-align: center;">暫無日誌記錄。</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
 {% endblock %}

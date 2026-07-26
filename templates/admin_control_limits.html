@@ -5,9 +5,17 @@
 
 <section class="panel">
     <p>依歷史平均值設定各能源種類與單位的管制範圍。超出範圍時會警告，但不會阻止送出。</p>
-    <form method="post">
+    <form method="post" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
         <input type="hidden" name="action" value="recalculate">
-        <button class="secondary" type="submit">重新依歷史平均值計算全部項目（±10%）</button>
+        <label for="recalc-pct" style="margin: 0; font-weight: bold;">重新計算偏離值範圍：</label>
+        <select id="recalc-pct" name="percentage" style="width: auto; min-height: 32px; padding: 2px 6px;">
+            <option value="5">±5%</option>
+            <option value="10" selected>±10%</option>
+            <option value="15">±15%</option>
+            <option value="20">±20%</option>
+            <option value="30">±30%</option>
+        </select>
+        <button class="secondary" type="submit" style="min-height: 32px; padding: 4px 10px;">重新計算全部項目</button>
     </form>
 </section>
 
