@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-Hant">
+<html lang="{{ 'vi' if current_language == 'vi' else 'zh-Hant' }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -47,14 +47,39 @@
             font-weight: 700;
             letter-spacing: .3px;
         }
+        .version {
+            display: inline-block;
+            margin-left: 8px;
+            padding: 1px 5px;
+            border: 1px solid #fff;
+            font-size: 11px;
+            font-weight: 400;
+            vertical-align: 1px;
+        }
         nav {
             display: flex;
             align-items: center;
             gap: 5px;
             flex-wrap: wrap;
         }
+        .language-form { display: flex; align-items: center; gap: 5px; }
+        .language-form select { width: auto; min-height: 30px; padding: 3px 24px 3px 6px; }
+        .language-button {
+            min-height: 32px;
+            background: #ffd966;
+            color: #000080;
+            border-color: #fff4c2 #8a6d00 #8a6d00 #fff4c2;
+            font-weight: 700;
+        }
+        .language-button:hover { background: #ffec99; }
         nav > a { display: inline-block; padding: 5px 8px; color: #000; text-decoration: none; border: 1px solid transparent; }
         nav > a:hover { border-color: var(--highlight) var(--shadow) var(--shadow) var(--highlight); }
+        nav > a.active {
+            background: #000080;
+            color: #fff;
+            border-color: #404040 #fff #fff #404040;
+            font-weight: 700;
+        }
         main { padding: 12px; }
         .container {
             max-width: 1240px;
@@ -117,7 +142,13 @@
             box-shadow: 1px 1px 0 #000;
         }
         button:active, .button:active { border-color: var(--shadow) var(--highlight) var(--highlight) var(--shadow); box-shadow: none; transform: translate(1px, 1px); }
-        button:focus, input:focus, select:focus { outline: 1px dotted #000; outline-offset: -4px; }
+        button:focus { outline: 1px dotted #000; outline-offset: -4px; }
+        input:not([type="checkbox"]):focus, select:focus {
+            background: #ffffc0;
+            border-color: #000080;
+            outline: 1px dotted #000080;
+            outline-offset: -5px;
+        }
         .button.secondary, button.secondary {
             background: var(--panel);
             color: #000;
@@ -184,6 +215,9 @@
             text-align: left;
         }
         .fill-table input { min-width: 96px; text-align: right; }
+        .fill-table input.pasted { background: #dcfce7; }
+        .fill-table input.paste-invalid { background: #fee4e2; }
+        .fill-table input.control-warning { background: #fff3cd; outline: 2px solid #b54708; }
         .login-box { max-width: 420px; margin: 45px auto; }
         .dashboard-heading { display: flex; justify-content: space-between; align-items: end; gap: 18px; margin-bottom: 18px; }
         .dashboard-heading p { margin: -6px 0 0; }
@@ -240,16 +274,22 @@
 </head>
 <body>
     <header>
-        <div class="brand">能源資料填報系統</div>
+        <div class="brand">
+            能源資料填報系統
+            <span class="version">v{{ app_version }}</span>
+        </div>
         {% if session.get("user_id") %}
             <nav>
                 {% if session.get("role") == "admin" %}
-                    <a href="{{ url_for('admin_dashboard') }}">管理首頁</a>
-                    <a href="{{ url_for('admin_users') }}">填寫員管理</a>
-                    <a href="{{ url_for('admin_settings') }}">能源/區域維護</a>
-                    <a href="{{ url_for('admin_reports') }}">填報查詢</a>
+                    <a class="{{ 'active' if request.endpoint == 'admin_dashboard' else '' }}" href="{{ url_for('admin_dashboard') }}">管理首頁</a>
+                    <a class="{{ 'active' if request.endpoint in ('admin_users', 'update_user_permissions', 'reset_user_password') else '' }}" href="{{ url_for('admin_users') }}">帳號權限管理</a>
+                    <a class="{{ 'active' if request.endpoint == 'admin_settings' else '' }}" href="{{ url_for('admin_settings') }}">能源/區域維護</a>
+                    <a class="{{ 'active' if request.endpoint == 'admin_control_limits' else '' }}" href="{{ url_for('admin_control_limits') }}">管制值管理</a>
+                    <a class="{{ 'active' if request.endpoint in ('admin_reports', 'export_reports') else '' }}" href="{{ url_for('admin_reports') }}">填報查詢</a>
+                {% elif session.get("role") == "viewer" %}
+                    <a class="{{ 'active' if request.endpoint in ('admin_reports', 'export_reports') else '' }}" href="{{ url_for('admin_reports') }}">資料查詢與匯出</a>
                 {% else %}
-                    <a href="{{ url_for('fill_report') }}">能源填報</a>
+                    <a class="{{ 'active' if request.endpoint == 'fill_report' else '' }}" href="{{ url_for('fill_report') }}">能源填報</a>
                 {% endif %}
                 <span class="muted">{{ session.get("display_name") }}</span>
                 <form class="inline-form" method="post" action="{{ url_for('logout') }}">
@@ -257,6 +297,12 @@
                 </form>
             </nav>
         {% endif %}
+        <form class="language-form" method="post" action="{{ url_for('set_language', language='vi' if current_language == 'zh-TW' else 'zh-TW') }}">
+            <input type="hidden" name="next" value="{{ request.script_root }}{{ request.full_path }}">
+            <button class="language-button" type="submit">
+                {{ "Tiếng Việt" if current_language == "zh-TW" else "中文" }}
+            </button>
+        </form>
     </header>
     <main>
         <div class="container">
@@ -272,5 +318,6 @@
             {% block content %}{% endblock %}
         </div>
     </main>
+    {% block scripts %}{% endblock %}
 </body>
 </html>

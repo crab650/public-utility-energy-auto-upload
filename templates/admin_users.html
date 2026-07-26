@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>填寫員管理</h1>
+<h1>帳號與權限管理</h1>
 
 <section class="panel">
-    <h2>新增填寫員</h2>
+    <h2>新增填寫員或訪客</h2>
     <form method="post" class="form-row">
         <div>
             <label for="username">帳號</label>
@@ -19,6 +19,13 @@
             <input id="display_name" name="display_name">
         </div>
         <div>
+            <label for="account_type">帳號權限</label>
+            <select id="account_type" name="account_type">
+                <option value="filler">填寫員</option>
+                <option value="viewer">訪客（僅查看及匯出）</option>
+            </select>
+        </div>
+        <div>
             <button type="submit">建立</button>
         </div>
     </form>
@@ -26,9 +33,13 @@
 
 {% for user in users %}
     <section class="panel">
-        <h2>{{ user.display_name }} <span class="muted">({{ user.username }})</span></h2>
+        <h2>
+            {{ user.display_name }} <span class="muted">({{ user.username }})</span>
+            {% if user.viewer %}<span class="muted">－訪客（唯讀）</span>{% endif %}
+        </h2>
+        {% if not user.viewer %}
         <form method="post" action="{{ url_for('update_user_permissions', user_id=user.id) }}">
-            <h3>可填寫能源種類</h3>
+            <h3>Y 軸：可填寫能源種類</h3>
             <div class="checkbox-list">
                 {% for energy_type in energy_types %}
                     <label class="checkbox-item">
@@ -36,9 +47,23 @@
                             type="checkbox"
                             name="energy_type_ids"
                             value="{{ energy_type.id }}"
-                            {% if energy_type.id|string in permissions.get(user.id, []) %}checked{% endif %}
+                            {% if energy_type.id|string in energy_permissions.get(user.id, []) %}checked{% endif %}
                         >
                         {{ energy_type.name }} / {{ energy_type.unit }}
+                    </label>
+                {% endfor %}
+            </div>
+            <h3 style="margin-top: 14px;">X 軸：可填寫單位</h3>
+            <div class="checkbox-list">
+                {% for area in areas %}
+                    <label class="checkbox-item">
+                        <input
+                            type="checkbox"
+                            name="area_ids"
+                            value="{{ area.id }}"
+                            {% if area.id|string in area_permissions.get(user.id, []) %}checked{% endif %}
+                        >
+                        {{ area.name }}
                     </label>
                 {% endfor %}
             </div>
@@ -46,6 +71,9 @@
                 <button type="submit">儲存權限</button>
             </div>
         </form>
+        {% else %}
+            <p class="muted">此帳號可查看所有年份資料並匯出 Excel，不可填報或修改資料。</p>
+        {% endif %}
         <form method="post" action="{{ url_for('reset_user_password', user_id=user.id) }}" class="form-row" style="margin-top: 16px;">
             <div>
                 <label for="password-{{ user.id }}">重設密碼</label>

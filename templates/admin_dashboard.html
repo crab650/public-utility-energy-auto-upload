@@ -18,7 +18,7 @@
 <div class="dashboard-kpis">
     <div class="kpi-card primary-card">
         <span class="kpi-label">{{ report_month }} 能源總金額（未稅）</span>
-        <strong>NT$ {{ "{:,.0f}".format(current_amount) }}</strong>
+        <strong>USD {{ "{:,.0f}".format(current_amount) }}</strong>
         <small>{{ valid_entries }} 筆有效填報資料</small>
     </div>
     <div class="kpi-card">
@@ -27,7 +27,7 @@
             <strong class="{{ 'trend-up' if month_change > 0 else 'trend-down' if month_change < 0 else '' }}">
                 {{ "+" if month_change > 0 else "" }}{{ "{:.1f}".format(month_change) }}%
             </strong>
-            <small>上月 NT$ {{ "{:,.0f}".format(previous_amount) }}</small>
+            <small>上月 USD {{ "{:,.0f}".format(previous_amount) }}</small>
         {% else %}
             <strong>—</strong>
             <small>上月沒有可比較資料</small>
@@ -54,7 +54,7 @@
             <div class="trend-chart" aria-label="每月能源費用趨勢圖">
                 {% for item in monthly_trend %}
                     <div class="trend-column {{ 'selected' if item.selected else '' }}">
-                        <div class="trend-value">{{ "{:,.0f}".format(item.amount / 10000) }}萬</div>
+                        <div class="trend-value">USD {{ "{:,.0f}".format(item.amount) }}</div>
                         <div class="trend-track"><div class="trend-bar" style="height: {{ item.percent }}%"></div></div>
                         <div class="trend-month">{{ item.month[2:] }}</div>
                     </div>
@@ -76,7 +76,7 @@
                             <strong>{{ "{:.1f}".format(item.percent) }}%</strong>
                         </div>
                         <div class="bar-track"><div class="bar-fill energy-fill" style="width: {{ item.percent }}%"></div></div>
-                        <div class="ranking-amount">NT$ {{ "{:,.0f}".format(item.amount) }}</div>
+                        <div class="ranking-amount">USD {{ "{:,.0f}".format(item.amount) }}</div>
                     </div>
                 {% endfor %}
             </div>
@@ -94,7 +94,7 @@
                         <span class="rank-number">{{ loop.index }}</span>
                         <span class="area-name">{{ item.name }}</span>
                         <div class="bar-track"><div class="bar-fill" style="width: {{ item.percent }}%"></div></div>
-                        <strong>NT$ {{ "{:,.0f}".format(item.amount) }}</strong>
+                        <strong>USD {{ "{:,.0f}".format(item.amount) }}</strong>
                         <span class="share">{{ "{:.1f}".format(item.share) }}%</span>
                     </div>
                 {% endfor %}

@@ -6,11 +6,22 @@
 <section class="panel">
     <form method="get" class="form-row">
         <div>
-            <label for="report_month">填報月份</label>
+            <label for="report_month">指定月份（優先）</label>
             <input id="report_month" name="report_month" type="month" value="{{ report_month }}">
         </div>
         <div>
+            <label for="report_year">或選擇年份</label>
+            <select id="report_year" name="report_year">
+                <option value="">全部年份</option>
+                {% for year in years %}
+                    <option value="{{ year }}" {% if report_year == year %}selected{% endif %}>{{ year }} 年</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
             <button class="secondary" type="submit">查詢</button>
+            <a class="button secondary" href="{{ url_for('admin_reports') }}">全部資料</a>
+            <a class="button" href="{{ url_for('export_reports', report_month=report_month, report_year=report_year) }}">匯出 Excel</a>
         </div>
     </form>
 </section>
@@ -44,7 +55,7 @@
                     <td>{{ row.updated_at }}</td>
                 </tr>
             {% else %}
-                <tr><td colspan="9" class="muted">此月份尚無填報資料。</td></tr>
+                <tr><td colspan="9" class="muted">查詢範圍內尚無填報資料。</td></tr>
             {% endfor %}
         </tbody>
     </table>

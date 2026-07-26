@@ -24,13 +24,30 @@
     {% endif %}
 </section>
 
-{% if not energy_types %}
-    <div class="panel muted">目前尚未被指派可填寫的能源種類，請洽管理者設定。</div>
+<section class="panel">
+    <h2>Excel 複製貼上操作</h2>
+    <p>可以直接從 Excel 複製多格資料，並一次貼到下方填報表格。</p>
+    <ol>
+        <li>在 Excel 依照填報表格的順序選取資料範圍。</li>
+        <li>按 <strong>Ctrl+C</strong> 複製選取的 Excel 資料。</li>
+        <li>回到本頁，點擊要開始填入的第一個欄位。</li>
+        <li>按 <strong>Ctrl+V</strong>，資料會依照 Excel 的列與欄自動填入。</li>
+        <li>確認綠色欄位與提示訊息；若有紅色錯誤欄位，請修正後再送出。</li>
+    </ol>
+    <p class="message warning" style="margin-bottom: 0;">
+        注意：請不要複製 Excel 的標題列，只需複製數量與金額資料。
+    </p>
+</section>
+
+{% if not energy_types or not areas %}
+    <div class="panel muted">目前尚未被指派可填寫的能源種類或單位，請洽管理者設定。</div>
 {% else %}
-    <form method="post">
+    <form id="fill-form" method="post">
         <input type="hidden" name="report_month" value="{{ report_month }}">
+        <div id="paste-message" class="message info" style="display: none;" role="status"></div>
+        <div id="control-message" class="message warning" style="display: none;" role="status"></div>
         <div class="panel table-wrap">
-            <table class="fill-table">
+            <table id="fill-table" class="fill-table">
                 <thead>
                     <tr>
                         <th class="row-head" rowspan="2">能源種類 / 單位</th>
@@ -51,10 +68,20 @@
                             <th class="row-head">{{ energy_type.name }}<br><span class="muted">{{ energy_type.unit }}</span></th>
                             {% for area in areas %}
                                 {% set entry = entries.get((energy_type.id, area.id)) %}
+                                {% set control = control_limits.get((energy_type.id, area.id)) %}
                                 <td>
                                     <input
                                         type="number"
                                         step="0.01"
+                                        inputmode="decimal"
+                                        data-entry-input
+                                        data-control-energy="{{ energy_type.name }}"
+                                        data-control-area="{{ area.name }}"
+                                        data-control-field="數量"
+                                        {% if control and control.quantity_enabled and control.quantity_min is not none and control.quantity_max is not none %}
+                                            data-control-min="{{ control.quantity_min }}"
+                                            data-control-max="{{ control.quantity_max }}"
+                                        {% endif %}
                                         name="quantity_{{ energy_type.id }}_{{ area.id }}"
                                         value="{{ entry.quantity if entry and entry.quantity is not none else '' }}"
                                     >
@@ -63,6 +90,15 @@
                                     <input
                                         type="number"
                                         step="0.01"
+                                        inputmode="decimal"
+                                        data-entry-input
+                                        data-control-energy="{{ energy_type.name }}"
+                                        data-control-area="{{ area.name }}"
+                                        data-control-field="金額(未稅)"
+                                        {% if control and control.amount_enabled and control.amount_min is not none and control.amount_max is not none %}
+                                            data-control-min="{{ control.amount_min }}"
+                                            data-control-max="{{ control.amount_max }}"
+                                        {% endif %}
                                         name="amount_{{ energy_type.id }}_{{ area.id }}"
                                         value="{{ entry.amount if entry and entry.amount is not none else '' }}"
                                     >
@@ -75,5 +111,178 @@
         </div>
         <button type="submit">{{ "重新送出填報資料" if is_submitted else "送出填報資料" }}</button>
     </form>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if energy_types and areas %}
+<script>
+(() => {
+    const table = document.querySelector("#fill-table");
+    const form = document.querySelector("#fill-form");
+    const message = document.querySelector("#paste-message");
+    const controlMessage = document.querySelector("#control-message");
+    const inputs = Array.from(table.querySelectorAll("[data-entry-input]"));
+    const columnCount = {{ areas|length * 2 }};
+
+    function showMessage(text, type = "info") {
+        message.textContent = text;
+        message.className = `message ${type}`;
+        message.style.display = "block";
+    }
+
+    function normalizeNumber(rawValue) {
+        let value = rawValue.trim().replace(/\s/g, "");
+        if (value === "") return { valid: true, value: "" };
+        const negative = /^\(.*\)$/.test(value);
+        if (negative) value = value.slice(1, -1);
+        value = value.replace(/,/g, "").replace(/NT\$|[$￥¥]/gi, "");
+        if (negative) value = `-${value}`;
+        return { valid: /^[-+]?\d+(\.\d+)?$/.test(value), value };
+    }
+
+    function checkControlLimits() {
+        const warnings = [];
+        inputs.forEach((input) => {
+            const minimum = input.dataset.controlMin;
+            const maximum = input.dataset.controlMax;
+            const value = input.value === "" ? NaN : Number(input.value);
+            const outside = minimum !== undefined && maximum !== undefined
+                && Number.isFinite(value)
+                && (value < Number(minimum) || value > Number(maximum));
+            input.classList.toggle("control-warning", outside);
+            if (outside) {
+                warnings.push({
+                    input,
+                    energy: input.dataset.controlEnergy,
+                    area: input.dataset.controlArea,
+                    field: input.dataset.controlField,
+                    value,
+                    minimum,
+                    maximum,
+                });
+                input.title = `輸入值超出管制範圍：${minimum} ～ ${maximum}`;
+            } else {
+                input.removeAttribute("title");
+            }
+        });
+        if (warnings.length) {
+            controlMessage.textContent = "";
+            const heading = document.createElement("strong");
+            heading.textContent = `${warnings.length} 筆資料超出管制範圍，仍可送出。`;
+            controlMessage.appendChild(heading);
+            const detailTitle = document.createElement("div");
+            detailTitle.textContent = "超出管制值明細：";
+            detailTitle.style.marginTop = "6px";
+            controlMessage.appendChild(detailTitle);
+            const list = document.createElement("ul");
+            list.style.margin = "6px 0 0";
+            warnings.forEach((warning) => {
+                const item = document.createElement("li");
+                item.textContent =
+                    `${warning.energy} × ${warning.area}－${warning.field}；` +
+                    `輸入值：${warning.value}；管制範圍：${warning.minimum} ～ ${warning.maximum}`;
+                item.title = "點擊可移至該欄位";
+                item.style.cursor = "pointer";
+                item.addEventListener("click", () => warning.input.focus());
+                list.appendChild(item);
+            });
+            controlMessage.appendChild(list);
+            controlMessage.style.display = "block";
+        } else {
+            controlMessage.style.display = "none";
+        }
+    }
+
+    table.addEventListener("paste", (event) => {
+        const startInput = event.target.closest("[data-entry-input]");
+        if (!startInput) return;
+
+        const clipboardText = event.clipboardData.getData("text/plain");
+        if (!clipboardText.includes("\t") && !clipboardText.includes("\n")) {
+            const result = normalizeNumber(clipboardText);
+            if (!result.valid) {
+                event.preventDefault();
+                startInput.classList.add("paste-invalid");
+                startInput.setCustomValidity("請輸入有效數字");
+                showMessage("貼上的內容不是有效數字。", "warning");
+                return;
+            }
+        }
+
+        event.preventDefault();
+        const startIndex = inputs.indexOf(startInput);
+        const startRow = Math.floor(startIndex / columnCount);
+        const startColumn = startIndex % columnCount;
+        const pastedRows = clipboardText
+            .replace(/\r/g, "")
+            .replace(/\n$/, "")
+            .split("\n")
+            .map((row) => row.split("\t"));
+        let success = 0;
+        let invalid = 0;
+        let overflow = 0;
+
+        inputs.forEach((input) => {
+            input.classList.remove("pasted", "paste-invalid");
+            input.setCustomValidity("");
+        });
+
+        pastedRows.forEach((values, rowOffset) => {
+            values.forEach((rawValue, columnOffset) => {
+                const row = startRow + rowOffset;
+                const column = startColumn + columnOffset;
+                if (row >= {{ energy_types|length }} || column >= columnCount) {
+                    overflow += 1;
+                    return;
+                }
+                const input = inputs[(row * columnCount) + column];
+                const result = normalizeNumber(rawValue);
+                if (result.valid) {
+                    input.value = result.value;
+                    input.classList.add("pasted");
+                    success += 1;
+                } else {
+                    input.value = "";
+                    input.classList.add("paste-invalid");
+                    input.setCustomValidity(`「${rawValue.trim()}」不是有效數字`);
+                    invalid += 1;
+                }
+            });
+        });
+
+        if (invalid || overflow) {
+            showMessage(
+                `已填入 ${success} 格；${invalid} 格不是有效數字；${overflow} 格超出表格範圍。`,
+                "warning"
+            );
+        } else {
+            showMessage(`Excel 貼上成功，共填入 ${success} 格。`, "success");
+        }
+        checkControlLimits();
+    });
+
+    table.addEventListener("input", (event) => {
+        const input = event.target.closest("[data-entry-input]");
+        if (!input) return;
+        input.classList.remove("pasted", "paste-invalid");
+        input.setCustomValidity("");
+        checkControlLimits();
+    });
+
+    form.addEventListener("submit", (event) => {
+        const warningCount = table.querySelectorAll("input.control-warning").length;
+        const warningText = warningCount
+            ? "\n\n目前有資料超出管制範圍，確定仍要送出嗎？"
+            : "";
+        const confirmed = window.confirm(
+            `確定要送出 {{ report_month }} 的填報資料嗎？\n送出後仍可修改並重新送出。${warningText}`
+        );
+        if (!confirmed) event.preventDefault();
+    });
+
+    checkControlLimits();
+})();
+</script>
 {% endif %}
 {% endblock %}

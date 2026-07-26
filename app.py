@@ -2,17 +2,215 @@ from __future__ import annotations
 
 import sqlite3
 from datetime import date
+from io import BytesIO
 from pathlib import Path
 
-from flask import Flask, flash, g, redirect, render_template, request, session, url_for
+from flask import Flask, flash, g, redirect, render_template, request, send_file, session, url_for
+from openpyxl import Workbook
 
 
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "instance" / "app.db"
+APP_VERSION = "0.6.7"
+
+VI_TRANSLATIONS = {
+    "能源資料填報系統": "Hệ thống khai báo dữ liệu năng lượng",
+    "管理首頁": "Trang quản trị",
+    "帳號權限管理": "Quản lý tài khoản và quyền",
+    "能源/區域維護": "Quản lý năng lượng/khu vực",
+    "填報查詢": "Tra cứu báo cáo",
+    "資料查詢與匯出": "Tra cứu và xuất dữ liệu",
+    "能源填報": "Khai báo năng lượng",
+    "登出": "Đăng xuất",
+    "登入": "Đăng nhập",
+    "帳號": "Tài khoản",
+    "密碼": "Mật khẩu",
+    "管理者預設帳號": "Tài khoản quản trị mặc định",
+    "能源資料輸入": "Nhập dữ liệu năng lượng",
+    "填報月份": "Tháng khai báo",
+    "切換月份": "Đổi tháng",
+    "填報資料": "Dữ liệu khai báo",
+    "此月份資料已於": "Dữ liệu tháng này đã được gửi lúc",
+    "送出。若需修正，可編輯後重新送出。": "Nếu cần sửa, có thể chỉnh sửa và gửi lại.",
+    "請填寫所選月份資料。按下送出後，資料會交給管理者查詢；之後仍可修正並重新送出。": "Vui lòng nhập dữ liệu của tháng đã chọn. Sau khi gửi, quản trị viên có thể tra cứu; bạn vẫn có thể sửa và gửi lại.",
+    "Excel 複製貼上操作": "Cách sao chép và dán từ Excel",
+    "可以直接從 Excel 複製多格資料，並一次貼到下方填報表格。": "Bạn có thể sao chép nhiều ô từ Excel và dán một lần vào bảng khai báo bên dưới.",
+    "在 Excel 依照填報表格的順序選取資料範圍。": "Trong Excel, chọn vùng dữ liệu theo đúng thứ tự của bảng khai báo.",
+    "按 Ctrl+C 複製選取的 Excel 資料。": "Nhấn Ctrl+C để sao chép dữ liệu đã chọn trong Excel.",
+    "回到本頁，點擊要開始填入的第一個欄位。": "Quay lại trang này và nhấp vào ô đầu tiên muốn điền.",
+    "按 Ctrl+V，資料會依照 Excel 的列與欄自動填入。": "Nhấn Ctrl+V; dữ liệu sẽ tự động điền theo hàng và cột trong Excel.",
+    "確認綠色欄位與提示訊息；若有紅色錯誤欄位，請修正後再送出。": "Kiểm tra các ô màu xanh và thông báo; nếu có ô lỗi màu đỏ, hãy sửa trước khi gửi.",
+    "注意：請不要複製 Excel 的標題列，只需複製數量與金額資料。": "Lưu ý: Không sao chép hàng tiêu đề trong Excel; chỉ sao chép dữ liệu số lượng và số tiền.",
+    "管制值管理": "Quản lý giới hạn kiểm soát",
+    "依歷史平均值設定各能源種類與單位的管制範圍。超出範圍時會警告，但不會阻止送出。": "Thiết lập phạm vi kiểm soát theo giá trị trung bình lịch sử cho từng loại năng lượng và đơn vị. Hệ thống sẽ cảnh báo khi vượt phạm vi nhưng vẫn cho phép gửi.",
+    "重新依歷史平均值計算全部項目（±10%）": "Tính lại tất cả theo trung bình lịch sử (±10%)",
+    "數量管制": "Kiểm soát số lượng",
+    "金額管制": "Kiểm soát số tiền",
+    "歷史平均": "Trung bình lịch sử",
+    "下限": "Giới hạn dưới",
+    "上限": "Giới hạn trên",
+    "啟用": "Bật",
+    "儲存管制值": "Lưu giới hạn kiểm soát",
+    "尚無歷史資料": "Chưa có dữ liệu lịch sử",
+    "輸入值超出管制範圍": "Giá trị nhập vượt phạm vi kiểm soát",
+    "筆資料超出管制範圍，仍可送出。": "giá trị vượt phạm vi kiểm soát; vẫn có thể gửi.",
+    "管制值已更新。": "Đã cập nhật giới hạn kiểm soát.",
+    "管制值已依歷史平均值重新計算。": "Đã tính lại giới hạn theo trung bình lịch sử.",
+    "管制值格式不正確，請確認上下限。": "Định dạng giới hạn không hợp lệ; vui lòng kiểm tra giới hạn dưới và trên.",
+    "下限不可大於上限。": "Giới hạn dưới không được lớn hơn giới hạn trên.",
+    "確定要送出": "Bạn có chắc muốn gửi dữ liệu tháng",
+    "的填報資料嗎？": "không?",
+    "送出後仍可修改並重新送出。": "Sau khi gửi, bạn vẫn có thể chỉnh sửa và gửi lại.",
+    "目前有資料超出管制範圍，確定仍要送出嗎？": "Hiện có dữ liệu vượt phạm vi kiểm soát. Bạn vẫn muốn gửi?",
+    "超出管制值明細：": "Chi tiết vượt giới hạn kiểm soát:",
+    "輸入值：": "Giá trị nhập:",
+    "管制範圍：": "Phạm vi kiểm soát:",
+    "點擊可移至該欄位": "Nhấp để chuyển đến ô này",
+    "目前尚未被指派可填寫的能源種類或單位，請洽管理者設定。": "Bạn chưa được cấp quyền cho loại năng lượng hoặc đơn vị. Vui lòng liên hệ quản trị viên.",
+    "能源種類 / 單位": "Loại năng lượng / Đơn vị",
+    "數量": "Số lượng",
+    "金額(未稅)": "Số tiền (chưa thuế)",
+    "重新送出填報資料": "Gửi lại dữ liệu",
+    "送出填報資料": "Gửi dữ liệu",
+    "請輸入有效數字": "Vui lòng nhập số hợp lệ",
+    "貼上的內容不是有效數字。": "Nội dung dán không phải là số hợp lệ.",
+    "不是有效數字": "không phải là số hợp lệ",
+    "已填入": "Đã điền",
+    "格超出表格範圍": "ô vượt ngoài phạm vi bảng",
+    "格": "ô",
+    "Excel 貼上成功，共填入": "Dán từ Excel thành công, tổng cộng",
+    "帳號與權限管理": "Quản lý tài khoản và quyền",
+    "新增填寫員或訪客": "Thêm nhân viên nhập liệu hoặc khách",
+    "顯示名稱": "Tên hiển thị",
+    "帳號權限": "Quyền tài khoản",
+    "填寫員": "Nhân viên nhập liệu",
+    "訪客（僅查看及匯出）": "Khách (chỉ xem và xuất)",
+    "建立": "Tạo",
+    "訪客（唯讀）": "Khách (chỉ đọc)",
+    "Y 軸：可填寫能源種類": "Trục Y: Loại năng lượng được phép nhập",
+    "X 軸：可填寫單位": "Trục X: Đơn vị được phép nhập",
+    "儲存權限": "Lưu quyền",
+    "此帳號可查看所有年份資料並匯出 Excel，不可填報或修改資料。": "Tài khoản này có thể xem dữ liệu mọi năm và xuất Excel, nhưng không thể nhập hoặc sửa dữ liệu.",
+    "重設密碼": "Đặt lại mật khẩu",
+    "輸入新密碼": "Nhập mật khẩu mới",
+    "尚未建立填寫員。": "Chưa có tài khoản.",
+    "指定月份（優先）": "Chọn tháng (ưu tiên)",
+    "或選擇年份": "Hoặc chọn năm",
+    "全部年份": "Tất cả các năm",
+    "查詢": "Tra cứu",
+    "全部資料": "Tất cả dữ liệu",
+    "匯出 Excel": "Xuất Excel",
+    "月份": "Tháng",
+    "能源種類": "Loại năng lượng",
+    "能源單位": "Đơn vị năng lượng",
+    "單位": "Đơn vị",
+    "區域": "Khu vực",
+    "送出時間": "Thời gian gửi",
+    "更新時間": "Thời gian cập nhật",
+    "查詢範圍內尚無填報資料。": "Không có dữ liệu trong phạm vi tìm kiếm.",
+    "新增能源種類": "Thêm loại năng lượng",
+    "例如：水(in-自來水)": "Ví dụ: Nước (nước máy vào)",
+    "例如：公噸": "Ví dụ: tấn",
+    "新增區域": "Thêm khu vực",
+    "區域名稱": "Tên khu vực",
+    "例如：Poly 51": "Ví dụ: Poly 51",
+    "目前能源種類": "Các loại năng lượng hiện tại",
+    "排序": "Thứ tự",
+    "目前區域": "Các khu vực hiện tại",
+    "能源分析看板": "Bảng phân tích năng lượng",
+    "掌握各月份能源費用、填報進度與主要成本分布。": "Theo dõi chi phí năng lượng, tiến độ khai báo và phân bổ chi phí chính theo tháng.",
+    "分析月份": "Tháng phân tích",
+    "更新": "Cập nhật",
+    "能源總金額（未稅）": "Tổng chi phí năng lượng (chưa thuế)",
+    "筆有效填報資料": "bản ghi hợp lệ",
+    "較": "So với",
+    "增減": "thay đổi",
+    "上月": "Tháng trước",
+    "上月沒有可比較資料": "Không có dữ liệu tháng trước để so sánh",
+    "已填報人數": "Số người đã khai báo",
+    "依有效填寫員帳號計算": "Tính theo tài khoản nhập liệu đang hoạt động",
+    "尚未填報人數": "Số người chưa khai báo",
+    "仍需追蹤填報進度": "Cần tiếp tục theo dõi tiến độ",
+    "本月皆已完成送出": "Tất cả đã gửi trong tháng này",
+    "每月能源費用趨勢": "Xu hướng chi phí năng lượng hàng tháng",
+    "最近 12 個有資料的月份": "12 tháng gần nhất có dữ liệu",
+    "目前尚無趨勢資料。": "Hiện chưa có dữ liệu xu hướng.",
+    "能源費用占比": "Tỷ trọng chi phí năng lượng",
+    "依未稅金額排序": "Sắp xếp theo số tiền chưa thuế",
+    "此月份尚無能源金額資料。": "Tháng này chưa có dữ liệu chi phí năng lượng.",
+    "各區域費用排名": "Xếp hạng chi phí theo khu vực",
+    "含占當月總費用比例": "Bao gồm tỷ lệ trong tổng chi phí tháng",
+    "目前尚未設定區域。": "Hiện chưa thiết lập khu vực.",
+    "請先登入。": "Vui lòng đăng nhập trước.",
+    "此功能限管理者使用。": "Chức năng này chỉ dành cho quản trị viên.",
+    "此功能限管理者或訪客使用。": "Chức năng này chỉ dành cho quản trị viên hoặc khách.",
+    "登入成功。": "Đăng nhập thành công.",
+    "帳號或密碼錯誤。": "Tài khoản hoặc mật khẩu không đúng.",
+    "已登出。": "Đã đăng xuất.",
+    "分析月份格式不正確。": "Định dạng tháng phân tích không hợp lệ.",
+    "請輸入帳號與密碼。": "Vui lòng nhập tài khoản và mật khẩu.",
+    "填寫員已建立。": "Đã tạo tài khoản.",
+    "帳號已存在。": "Tài khoản đã tồn tại.",
+    "找不到填寫員。": "Không tìm thấy tài khoản.",
+    "填寫權限已更新。": "Đã cập nhật quyền nhập liệu.",
+    "請輸入新密碼。": "Vui lòng nhập mật khẩu mới.",
+    "密碼已重設。": "Đã đặt lại mật khẩu.",
+    "請輸入能源種類與單位。": "Vui lòng nhập loại năng lượng và đơn vị.",
+    "能源種類已新增。": "Đã thêm loại năng lượng.",
+    "能源種類已存在。": "Loại năng lượng đã tồn tại.",
+    "請輸入區域名稱。": "Vui lòng nhập tên khu vực.",
+    "區域已新增。": "Đã thêm khu vực.",
+    "區域已存在。": "Khu vực đã tồn tại.",
+    "填報月份格式不正確。": "Định dạng tháng khai báo không hợp lệ.",
+    "目前尚未被指派可填寫的能源種類或單位，無法送出。": "Chưa được cấp quyền loại năng lượng hoặc đơn vị nên không thể gửi.",
+    "能源資料已送出。若需修正，可再次編輯後重新送出。": "Dữ liệu năng lượng đã được gửi. Nếu cần sửa, hãy chỉnh sửa và gửi lại.",
+    "能源填報資料": "Dữ liệu khai báo năng lượng",
+    "年": "Năm",
+}
 
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "dev-secret-change-me"
+
+
+def translate(text: str) -> str:
+    if session.get("language", "zh-TW") == "vi":
+        return VI_TRANSLATIONS.get(text, text)
+    return text
+
+
+@app.context_processor
+def inject_app_version() -> dict[str, str]:
+    return {
+        "app_version": APP_VERSION,
+        "current_language": session.get("language", "zh-TW"),
+    }
+
+
+@app.after_request
+def translate_html_response(response):
+    if (
+        session.get("language") == "vi"
+        and response.content_type
+        and response.content_type.startswith("text/html")
+    ):
+        html = response.get_data(as_text=True)
+        for chinese, vietnamese in sorted(
+            VI_TRANSLATIONS.items(), key=lambda item: len(item[0]), reverse=True
+        ):
+            html = html.replace(chinese, vietnamese)
+        response.set_data(html)
+    return response
+
+
+@app.route("/language/<language>", methods=["POST"])
+def set_language(language: str):
+    if language in {"zh-TW", "vi"}:
+        session["language"] = language
+    next_url = request.form.get("next", "")
+    if not next_url.startswith("/") or next_url.startswith("//"):
+        next_url = url_for("index")
+    return redirect(next_url)
 
 
 DEFAULT_ENERGY_TYPES = [
@@ -84,6 +282,12 @@ def close_db(error: BaseException | None) -> None:
 
 def init_db() -> None:
     db = get_db()
+    area_permissions_exist = db.execute(
+        """
+        SELECT 1 FROM sqlite_master
+        WHERE type = 'table' AND name = 'user_area_permissions'
+        """
+    ).fetchone() is not None
     db.executescript(
         """
         CREATE TABLE IF NOT EXISTS users (
@@ -92,6 +296,7 @@ def init_db() -> None:
             password TEXT NOT NULL,
             display_name TEXT NOT NULL,
             role TEXT NOT NULL CHECK(role IN ('admin', 'filler')),
+            viewer INTEGER NOT NULL DEFAULT 0,
             active INTEGER NOT NULL DEFAULT 1,
             created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
         );
@@ -119,6 +324,14 @@ def init_db() -> None:
             FOREIGN KEY (energy_type_id) REFERENCES energy_types(id)
         );
 
+        CREATE TABLE IF NOT EXISTS user_area_permissions (
+            user_id INTEGER NOT NULL,
+            area_id INTEGER NOT NULL,
+            PRIMARY KEY (user_id, area_id),
+            FOREIGN KEY (user_id) REFERENCES users(id),
+            FOREIGN KEY (area_id) REFERENCES areas(id)
+        );
+
         CREATE TABLE IF NOT EXISTS energy_entries (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             report_month TEXT NOT NULL,
@@ -143,10 +356,85 @@ def init_db() -> None:
             UNIQUE(report_month, user_id),
             FOREIGN KEY (user_id) REFERENCES users(id)
         );
+
+        CREATE TABLE IF NOT EXISTS control_limits (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            energy_type_id INTEGER NOT NULL,
+            area_id INTEGER NOT NULL,
+            quantity_enabled INTEGER NOT NULL DEFAULT 0,
+            quantity_average REAL,
+            quantity_min REAL,
+            quantity_max REAL,
+            amount_enabled INTEGER NOT NULL DEFAULT 0,
+            amount_average REAL,
+            amount_min REAL,
+            amount_max REAL,
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(energy_type_id, area_id),
+            FOREIGN KEY (energy_type_id) REFERENCES energy_types(id),
+            FOREIGN KEY (area_id) REFERENCES areas(id)
+        );
         """
     )
+    if "viewer" not in {
+        row["name"] for row in db.execute("PRAGMA table_info(users)").fetchall()
+    }:
+        db.execute("ALTER TABLE users ADD COLUMN viewer INTEGER NOT NULL DEFAULT 0")
     seed_defaults(db)
+    seed_control_limits(db)
+    if not area_permissions_exist:
+        # Existing fillers used to have access to every area. Preserve that
+        # behavior when introducing X-axis permissions.
+        db.execute(
+            """
+            INSERT OR IGNORE INTO user_area_permissions (user_id, area_id)
+            SELECT u.id, a.id
+            FROM users u
+            CROSS JOIN areas a
+            WHERE u.role = 'filler' AND a.active = 1
+            """
+        )
     db.commit()
+
+
+def seed_control_limits(db: sqlite3.Connection, replace: bool = False) -> None:
+    if replace:
+        db.execute("DELETE FROM control_limits")
+    db.execute(
+        """
+        WITH averages AS (
+            SELECT
+                energy_type_id,
+                area_id,
+                AVG(quantity) AS quantity_average,
+                AVG(amount) AS amount_average
+            FROM energy_entries
+            GROUP BY energy_type_id, area_id
+        )
+        INSERT OR IGNORE INTO control_limits (
+            energy_type_id, area_id,
+            quantity_enabled, quantity_average, quantity_min, quantity_max,
+            amount_enabled, amount_average, amount_min, amount_max
+        )
+        SELECT
+            et.id,
+            a.id,
+            CASE WHEN av.quantity_average IS NULL THEN 0 ELSE 1 END,
+            av.quantity_average,
+            av.quantity_average - ABS(av.quantity_average) * 0.1,
+            av.quantity_average + ABS(av.quantity_average) * 0.1,
+            CASE WHEN av.amount_average IS NULL THEN 0 ELSE 1 END,
+            av.amount_average,
+            av.amount_average - ABS(av.amount_average) * 0.1,
+            av.amount_average + ABS(av.amount_average) * 0.1
+        FROM energy_types et
+        CROSS JOIN areas a
+        LEFT JOIN averages av
+            ON av.energy_type_id = et.id
+            AND av.area_id = a.id
+        WHERE et.active = 1 AND a.active = 1
+        """
+    )
 
 
 def seed_defaults(db: sqlite3.Connection) -> None:
@@ -206,6 +494,16 @@ def admin_required():
     return None
 
 
+def report_access_required():
+    guard = login_required()
+    if guard:
+        return guard
+    if session.get("role") not in {"admin", "viewer"}:
+        flash("此功能限管理者或訪客使用。", "danger")
+        return redirect(url_for("fill_report"))
+    return None
+
+
 def active_energy_types() -> list[sqlite3.Row]:
     return get_db().execute(
         """
@@ -232,6 +530,8 @@ def index():
         return redirect(url_for("login"))
     if session.get("role") == "admin":
         return redirect(url_for("admin_dashboard"))
+    if session.get("role") == "viewer":
+        return redirect(url_for("admin_reports"))
     return redirect(url_for("fill_report"))
 
 
@@ -249,11 +549,13 @@ def login():
         ).fetchone()
 
         if user:
+            language = session.get("language", "zh-TW")
             session.clear()
+            session["language"] = language
             session["user_id"] = user["id"]
             session["username"] = user["username"]
             session["display_name"] = user["display_name"]
-            session["role"] = user["role"]
+            session["role"] = "viewer" if user["viewer"] else user["role"]
             flash("登入成功。", "success")
             return redirect(url_for("index"))
 
@@ -264,7 +566,9 @@ def login():
 
 @app.route("/logout", methods=["POST"])
 def logout():
+    language = session.get("language", "zh-TW")
     session.clear()
+    session["language"] = language
     flash("已登出。", "info")
     return redirect(url_for("login"))
 
@@ -296,14 +600,14 @@ def admin_dashboard():
         else None
     )
     active_fillers = db.execute(
-        "SELECT COUNT(*) FROM users WHERE role = 'filler' AND active = 1"
+        "SELECT COUNT(*) FROM users WHERE role = 'filler' AND viewer = 0 AND active = 1"
     ).fetchone()[0]
     submitted_fillers = db.execute(
         """
         SELECT COUNT(DISTINCT rs.user_id)
         FROM report_submissions rs
         JOIN users u ON u.id = rs.user_id
-        WHERE rs.report_month = ? AND u.role = 'filler' AND u.active = 1
+        WHERE rs.report_month = ? AND u.role = 'filler' AND u.viewer = 0 AND u.active = 1
         """,
         (report_month,),
     ).fetchone()[0]
@@ -380,7 +684,7 @@ def admin_dashboard():
         for row in area_rows
     ]
     stats = {
-        "fillers": db.execute("SELECT COUNT(*) FROM users WHERE role = 'filler'").fetchone()[0],
+        "fillers": db.execute("SELECT COUNT(*) FROM users WHERE role = 'filler' AND viewer = 0").fetchone()[0],
         "energy_types": db.execute("SELECT COUNT(*) FROM energy_types WHERE active = 1").fetchone()[0],
         "areas": db.execute("SELECT COUNT(*) FROM areas WHERE active = 1").fetchone()[0],
         "entries": db.execute("SELECT COUNT(*) FROM energy_entries").fetchone()[0],
@@ -414,17 +718,32 @@ def admin_users():
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "").strip()
         display_name = request.form.get("display_name", "").strip() or username
+        account_type = request.form.get("account_type", "filler")
+        if account_type not in {"filler", "viewer"}:
+            account_type = "filler"
         if not username or not password:
             flash("請輸入帳號與密碼。", "danger")
         else:
             try:
                 db.execute(
                     """
-                    INSERT INTO users (username, password, display_name, role)
-                    VALUES (?, ?, ?, 'filler')
+                    INSERT INTO users (username, password, display_name, role, viewer)
+                    VALUES (?, ?, ?, 'filler', ?)
                     """,
-                    (username, password, display_name),
+                    (username, password, display_name, account_type == "viewer"),
                 )
+                user_id = db.execute(
+                    "SELECT id FROM users WHERE username = ?",
+                    (username,),
+                ).fetchone()["id"]
+                if account_type == "filler":
+                    db.execute(
+                        """
+                        INSERT INTO user_area_permissions (user_id, area_id)
+                        SELECT ?, id FROM areas WHERE active = 1
+                        """,
+                        (user_id,),
+                    )
                 db.commit()
                 flash("填寫員已建立。", "success")
             except sqlite3.IntegrityError:
@@ -438,7 +757,7 @@ def admin_users():
         ORDER BY id DESC
         """
     ).fetchall()
-    permissions = {
+    energy_permissions = {
         row["user_id"]: set(row["energy_ids"].split(",") if row["energy_ids"] else [])
         for row in db.execute(
             """
@@ -448,11 +767,23 @@ def admin_users():
             """
         ).fetchall()
     }
+    area_permissions = {
+        row["user_id"]: set(row["area_ids"].split(",") if row["area_ids"] else [])
+        for row in db.execute(
+            """
+            SELECT user_id, GROUP_CONCAT(area_id) AS area_ids
+            FROM user_area_permissions
+            GROUP BY user_id
+            """
+        ).fetchall()
+    }
     return render_template(
         "admin_users.html",
         users=users,
         energy_types=active_energy_types(),
-        permissions=permissions,
+        areas=active_areas(),
+        energy_permissions=energy_permissions,
+        area_permissions=area_permissions,
     )
 
 
@@ -464,21 +795,30 @@ def update_user_permissions(user_id: int):
 
     db = get_db()
     user = db.execute(
-        "SELECT * FROM users WHERE id = ? AND role = 'filler'",
+        "SELECT * FROM users WHERE id = ? AND role = 'filler' AND viewer = 0",
         (user_id,),
     ).fetchone()
     if user is None:
         flash("找不到填寫員。", "warning")
         return redirect(url_for("admin_users"))
 
-    selected = request.form.getlist("energy_type_ids")
+    selected_energy_ids = request.form.getlist("energy_type_ids")
+    selected_area_ids = request.form.getlist("area_ids")
     db.execute("DELETE FROM user_energy_permissions WHERE user_id = ?", (user_id,))
     db.executemany(
         """
         INSERT INTO user_energy_permissions (user_id, energy_type_id)
         VALUES (?, ?)
         """,
-        [(user_id, energy_id) for energy_id in selected],
+        [(user_id, energy_id) for energy_id in selected_energy_ids],
+    )
+    db.execute("DELETE FROM user_area_permissions WHERE user_id = ?", (user_id,))
+    db.executemany(
+        """
+        INSERT INTO user_area_permissions (user_id, area_id)
+        VALUES (?, ?)
+        """,
+        [(user_id, area_id) for area_id in selected_area_ids],
     )
     db.commit()
     flash("填寫權限已更新。", "success")
@@ -562,6 +902,81 @@ def admin_settings():
     )
 
 
+@app.route("/admin/control-limits", methods=["GET", "POST"])
+def admin_control_limits():
+    guard = admin_required()
+    if guard:
+        return guard
+
+    db = get_db()
+    if request.method == "POST" and request.form.get("action") == "recalculate":
+        seed_control_limits(db, replace=True)
+        db.commit()
+        flash("管制值已依歷史平均值重新計算。", "success")
+        return redirect(url_for("admin_control_limits"))
+
+    if request.method == "POST":
+        rows = db.execute("SELECT id FROM control_limits ORDER BY id").fetchall()
+        updates = []
+        try:
+            for row in rows:
+                control_id = row["id"]
+                quantity_enabled = f"quantity_enabled_{control_id}" in request.form
+                amount_enabled = f"amount_enabled_{control_id}" in request.form
+
+                def optional_float(field: str) -> float | None:
+                    value = request.form.get(f"{field}_{control_id}", "").strip()
+                    return float(value) if value else None
+
+                quantity_min = optional_float("quantity_min")
+                quantity_max = optional_float("quantity_max")
+                amount_min = optional_float("amount_min")
+                amount_max = optional_float("amount_max")
+                if quantity_enabled and (quantity_min is None or quantity_max is None):
+                    raise ValueError
+                if amount_enabled and (amount_min is None or amount_max is None):
+                    raise ValueError
+                if quantity_min is not None and quantity_max is not None and quantity_min > quantity_max:
+                    flash("下限不可大於上限。", "danger")
+                    return redirect(url_for("admin_control_limits"))
+                if amount_min is not None and amount_max is not None and amount_min > amount_max:
+                    flash("下限不可大於上限。", "danger")
+                    return redirect(url_for("admin_control_limits"))
+                updates.append((
+                    quantity_enabled, quantity_min, quantity_max,
+                    amount_enabled, amount_min, amount_max, control_id,
+                ))
+        except ValueError:
+            flash("管制值格式不正確，請確認上下限。", "danger")
+            return redirect(url_for("admin_control_limits"))
+
+        db.executemany(
+            """
+            UPDATE control_limits
+            SET quantity_enabled = ?, quantity_min = ?, quantity_max = ?,
+                amount_enabled = ?, amount_min = ?, amount_max = ?,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+            """,
+            updates,
+        )
+        db.commit()
+        flash("管制值已更新。", "success")
+        return redirect(url_for("admin_control_limits"))
+
+    rows = db.execute(
+        """
+        SELECT cl.*, et.name AS energy_name, et.unit, a.name AS area_name
+        FROM control_limits cl
+        JOIN energy_types et ON et.id = cl.energy_type_id
+        JOIN areas a ON a.id = cl.area_id
+        WHERE et.active = 1 AND a.active = 1
+        ORDER BY et.display_order, et.id, a.display_order, a.id
+        """
+    ).fetchall()
+    return render_template("admin_control_limits.html", rows=rows)
+
+
 @app.route("/fill", methods=["GET", "POST"])
 def fill_report():
     guard = login_required()
@@ -569,6 +984,8 @@ def fill_report():
         return guard
     if session.get("role") == "admin":
         return redirect(url_for("admin_dashboard"))
+    if session.get("role") == "viewer":
+        return redirect(url_for("admin_reports"))
 
     db = get_db()
     user_id = session["user_id"]
@@ -591,7 +1008,30 @@ def fill_report():
         """,
         (user_id,),
     ).fetchall()
-    areas = active_areas()
+    areas = db.execute(
+        """
+        SELECT a.*
+        FROM areas a
+        JOIN user_area_permissions p ON p.area_id = a.id
+        WHERE p.user_id = ? AND a.active = 1
+        ORDER BY a.display_order, a.id
+        """,
+        (user_id,),
+    ).fetchall()
+    control_limits = {
+        (row["energy_type_id"], row["area_id"]): row
+        for row in db.execute(
+            """
+            SELECT cl.*
+            FROM control_limits cl
+            JOIN user_energy_permissions ep
+                ON ep.energy_type_id = cl.energy_type_id AND ep.user_id = ?
+            JOIN user_area_permissions ap
+                ON ap.area_id = cl.area_id AND ap.user_id = ?
+            """,
+            (user_id, user_id),
+        ).fetchall()
+    }
     submission = db.execute(
         """
         SELECT * FROM report_submissions
@@ -602,14 +1042,30 @@ def fill_report():
     is_submitted = submission is not None
 
     if request.method == "POST":
-        if not energy_types:
-            flash("目前尚未被指派可填寫的能源種類，無法送出。", "warning")
+        if not energy_types or not areas:
+            flash("目前尚未被指派可填寫的能源種類或單位，無法送出。", "warning")
             return redirect(url_for("fill_report", report_month=report_month))
 
+        control_warning_count = 0
         for energy_type in energy_types:
             for area in areas:
                 quantity = request.form.get(f"quantity_{energy_type['id']}_{area['id']}", "").strip()
                 amount = request.form.get(f"amount_{energy_type['id']}_{area['id']}", "").strip()
+                limit = control_limits.get((energy_type["id"], area["id"]))
+                for value, enabled_key, min_key, max_key in (
+                    (quantity, "quantity_enabled", "quantity_min", "quantity_max"),
+                    (amount, "amount_enabled", "amount_min", "amount_max"),
+                ):
+                    if (
+                        value and limit and limit[enabled_key]
+                        and limit[min_key] is not None and limit[max_key] is not None
+                    ):
+                        try:
+                            numeric_value = float(value)
+                        except ValueError:
+                            continue
+                        if numeric_value < limit[min_key] or numeric_value > limit[max_key]:
+                            control_warning_count += 1
                 db.execute(
                     """
                     INSERT INTO energy_entries (
@@ -637,6 +1093,8 @@ def fill_report():
         )
         db.commit()
         flash(f"{report_month} 能源資料已送出。若需修正，可再次編輯後重新送出。", "success")
+        if control_warning_count:
+            flash(f"{control_warning_count} 筆資料超出管制範圍，仍可送出。", "warning")
         return redirect(url_for("fill_report", report_month=report_month))
 
     entries = {
@@ -655,20 +1113,24 @@ def fill_report():
         energy_types=energy_types,
         areas=areas,
         entries=entries,
+        control_limits=control_limits,
         is_submitted=is_submitted,
         submitted_at=submission["submitted_at"] if submission else None,
     )
 
 
-@app.route("/admin/reports", methods=["GET"])
-def admin_reports():
-    guard = admin_required()
-    if guard:
-        return guard
-
-    report_month = request.args.get("report_month") or current_report_month()
-    rows = get_db().execute(
-        """
+def report_rows(report_month: str, report_year: str) -> list[sqlite3.Row]:
+    filters = []
+    params = []
+    if report_month:
+        filters.append("ee.report_month = ?")
+        params.append(report_month)
+    elif report_year:
+        filters.append("substr(ee.report_month, 1, 4) = ?")
+        params.append(report_year)
+    where_sql = f"WHERE {' AND '.join(filters)}" if filters else ""
+    return get_db().execute(
+        f"""
         SELECT
             ee.report_month,
             u.display_name,
@@ -686,12 +1148,85 @@ def admin_reports():
         LEFT JOIN report_submissions rs
             ON rs.report_month = ee.report_month
             AND rs.user_id = ee.user_id
-        WHERE ee.report_month = ?
-        ORDER BY u.display_name, et.display_order, a.display_order
+        {where_sql}
+        ORDER BY ee.report_month DESC, u.display_name, et.display_order, a.display_order
         """,
-        (report_month,),
+        params,
     ).fetchall()
-    return render_template("admin_reports.html", report_month=report_month, rows=rows)
+
+
+def report_filters() -> tuple[str, str]:
+    report_month = request.args.get("report_month", "").strip()
+    report_year = request.args.get("report_year", "").strip()
+    if report_month and not valid_report_month(report_month):
+        report_month = ""
+    if report_year and (len(report_year) != 4 or not report_year.isdigit()):
+        report_year = ""
+    return report_month, report_year
+
+
+@app.route("/reports", methods=["GET"])
+@app.route("/admin/reports", methods=["GET"])
+def admin_reports():
+    guard = report_access_required()
+    if guard:
+        return guard
+
+    report_month, report_year = report_filters()
+    years = [
+        row[0] for row in get_db().execute(
+            """
+            SELECT DISTINCT substr(report_month, 1, 4) AS year
+            FROM energy_entries ORDER BY year DESC
+            """
+        ).fetchall()
+    ]
+    return render_template(
+        "admin_reports.html",
+        report_month=report_month,
+        report_year=report_year,
+        years=years,
+        rows=report_rows(report_month, report_year),
+    )
+
+
+@app.route("/reports/export", methods=["GET"])
+def export_reports():
+    guard = report_access_required()
+    if guard:
+        return guard
+
+    report_month, report_year = report_filters()
+    workbook = Workbook()
+    sheet = workbook.active
+    sheet.title = translate("能源填報資料")
+    sheet.append([
+        translate("月份"), translate("填寫員"), translate("能源種類"),
+        translate("能源單位"), translate("區域"), translate("數量"),
+        translate("金額(未稅)"), translate("送出時間"), translate("更新時間"),
+    ])
+    for row in report_rows(report_month, report_year):
+        sheet.append([
+            row["report_month"], row["display_name"], row["energy_name"], row["unit"],
+            row["area_name"], row["quantity"], row["amount"],
+            row["submitted_at"], row["updated_at"],
+        ])
+    sheet.freeze_panes = "A2"
+    for column in sheet.columns:
+        sheet.column_dimensions[column[0].column_letter].width = min(
+            max(len(str(cell.value or "")) for cell in column) + 2,
+            40,
+        )
+    output = BytesIO()
+    workbook.save(output)
+    output.seek(0)
+    suffix = report_month or report_year or "all"
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name=f"energy-report-{suffix}.xlsx",
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
 
 
 if __name__ == "__main__":
