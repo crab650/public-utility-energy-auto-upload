@@ -11,7 +11,7 @@
             <label for="report_month">分析月份</label>
             <div class="month-picker-controls">
                 <input id="report_month" name="report_month" type="month" value="{{ report_month }}" required>
-                <button type="submit">更新</button>
+                <button type="submit">套用分析月份</button>
             </div>
         </form>
         <div>
@@ -20,6 +20,7 @@
     </div>
 </div>
 
+<p class="muted">分析月份會套用到金額、填報進度、能源占比與區域排名；趨勢圖固定顯示最近 12 個有資料的月份。</p>
 <div class="dashboard-kpis">
     <div class="kpi-card primary-card">
         <span class="kpi-label">{{ report_month }} 能源總金額（未稅）</span>
@@ -46,7 +47,7 @@
     <div class="kpi-card {{ 'attention-card' if pending_fillers else '' }}">
         <span class="kpi-label">尚未填報人數</span>
         <strong>{{ pending_fillers }}</strong>
-        <small>{{ "仍需追蹤填報進度" if pending_fillers else "本月皆已完成送出" }}</small>
+        <small>{{ ("仍需追蹤填報進度" if pending_fillers else "本月皆已完成送出")|label }}</small>
     </div>
 </div>
 

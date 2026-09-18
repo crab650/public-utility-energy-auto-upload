@@ -82,6 +82,7 @@
     </div>
 </section>
 
+<h2>全體點位概況（不受篩選影響）</h2>
 <section class="ems-kpis" aria-label="點位摘要">
     <div class="ems-kpi primary"><span>公用點位</span><strong>{{ stats.total or 0 }}</strong><small>本地 SQLite 點位快照</small></div>
     <div class="ems-kpi"><span>啟用監控</span><strong>{{ stats.monitored or 0 }}</strong><small>新點位預設啟用</small></div>
@@ -92,7 +93,9 @@
 
 <section class="panel">
     <h2>搜尋與篩選</h2>
-    <form method="get" class="ems-filters">
+    <p class="muted">以下條件可一起使用，只顯示同時符合所有條件的點位；留空或選「全部」表示不限制。</p>
+    <p class="muted">搜尋文字會比對點位名稱、路徑、說明及顯示名稱，任一欄符合即可。</p>
+    <form method="get" action="{{ url_for('admin_ems_points') }}" class="ems-filters">
         <div class="search-field">
             <label for="q">搜尋點位</label>
             <input id="q" name="q" type="search" value="{{ filters.q }}" placeholder="PointName、JsonPath、Description、顯示名稱">
@@ -109,7 +112,7 @@
             <label for="category_id">能源類別</label>
             <select id="category_id" name="category_id">
                 <option value="">全部類別</option>
-                {% for item in categories %}<option value="{{ item.id }}" {% if filters.category_id == item.id|string %}selected{% endif %}>{{ item.name }}</option>{% endfor %}
+                {% for item in categories %}<option value="{{ item.id }}" {% if filters.category_id == item.id|string %}selected{% endif %}>{{ item.name|label }}</option>{% endfor %}
             </select>
         </div>
         <div>
@@ -132,25 +135,34 @@
         </div>
         <input type="hidden" name="per_page" value="{{ per_page }}">
         <div style="display:flex; gap:6px;">
-            <button type="submit">查詢</button>
-            <a class="button secondary" href="{{ url_for('admin_ems_points') }}" style="text-decoration:none;">清除</a>
+            <button type="submit">套用篩選</button>
+            <a class="button secondary" href="{{ url_for('admin_ems_points') }}" style="text-decoration:none;">清除全部篩選</a>
         </div>
     </form>
 </section>
 
 <section class="panel">
+    <div class="query-result-heading">
+        <h2>目前結果：{{ total_rows }} 筆</h2>
+        <a class="button secondary" href="{{ url_for('export_ems_points', **filters) }}">匯出目前結果</a>
+    </div>
+    <div class="query-chips">
+        {% for label, value in active_filters %}<span class="query-chip">{{ label|label }}：{{ value }}</span>
+        {% else %}<span class="muted">未限制條件，顯示全部點位。</span>{% endfor %}
+    </div>
+    <p class="muted">修改條件後請按「套用篩選」；匯出包含目前條件的所有頁面。</p>
+    <h3>批次修改（僅限勾選的點位）</h3>
     <form id="bulk-form" method="post" action="{{ url_for('bulk_update_ems_points') }}">
         <input type="hidden" name="return_to" value="{{ request.full_path }}">
         <div class="ems-bulk">
             <strong><span id="selected-count">0</span> 筆已選取</strong>
             <select name="bulk_category_id" aria-label="批次能源類別">
                 <option value="">批次設定能源類別…</option>
-                {% for item in categories %}<option value="{{ item.id }}">{{ item.name }}</option>{% endfor %}
+                {% for item in categories %}<option value="{{ item.id }}">{{ item.name|label }}</option>{% endfor %}
             </select>
             <button type="submit" name="action" value="set_category">套用類別</button>
             <button type="submit" name="action" value="monitor_on">啟用監控</button>
             <button type="submit" name="action" value="monitor_off">停止監控</button>
-            <a class="button secondary" href="{{ url_for('export_ems_points') }}" style="text-decoration:none;">匯出 Excel</a>
         </div>
     </form>
 
@@ -187,9 +199,9 @@
                         <td>{% if point.monitor_enabled %}<span class="ems-badge success">監控中</span>{% else %}<span class="ems-badge">不監控</span>{% endif %}</td>
                         <td>{{ point.lower_limit if point.lower_limit is not none else '—' }}</td>
                         <td>{{ point.upper_limit if point.upper_limit is not none else '—' }}</td>
-                        <td>{{ point.category_name or '未分類' }}</td>
-                        <td>{{ point.measurement_name or '未分類' }}</td>
-                        <td>{{ point.unit_name or '—' }}</td>
+                        <td>{{ (point.category_name or '未分類')|label }}</td>
+                        <td>{{ (point.measurement_name or '未分類')|label }}</td>
+                        <td>{{ (point.unit_name or '—')|label }}</td>
                         <td>{{ point.location_name or '—' }}</td>
                         <td>
                             {% if not point.source_present %}
@@ -207,7 +219,7 @@
                         <td><button class="edit-point" type="button" data-point-id="{{ point.id }}">編輯</button></td>
                     </tr>
                 {% else %}
-                    <tr><td colspan="14" class="empty-state">目前篩選條件沒有符合的點位。</td></tr>
+                    <tr><td colspan="14" class="empty-state">目前篩選條件沒有符合的點位。<br>請減少篩選條件，或按「清除全部篩選」查看全部點位。</td></tr>
                 {% endfor %}
             </tbody>
         </table>
@@ -263,11 +275,11 @@
                 <div><label for="field-upper">上限</label><input id="field-upper" name="upper_limit" type="number" step="any" placeholder="未設定"></div>
                 <div>
                     <label for="field-severity">告警等級</label>
-                    <select id="field-severity" name="alarm_severity">{% for key, label in alarm_severities.items() %}<option value="{{ key }}">{{ label }}</option>{% endfor %}</select>
+                    <select id="field-severity" name="alarm_severity">{% for key, label in alarm_severities.items() %}<option value="{{ key }}">{{ label|label }}</option>{% endfor %}</select>
                 </div>
                 <div>
                     <label for="field-alarm-value-mode">告警判斷值</label>
-                    <select id="field-alarm-value-mode" name="alarm_value_mode">{% for key, label in alarm_value_modes.items() %}<option value="{{ key }}">{{ label }}</option>{% endfor %}</select>
+                    <select id="field-alarm-value-mode" name="alarm_value_mode">{% for key, label in alarm_value_modes.items() %}<option value="{{ key }}">{{ label|label }}</option>{% endfor %}</select>
                     <span class="muted">累積表值通常使用「每次收集差值」。</span>
                 </div>
                 <div>
@@ -287,15 +299,15 @@
                 <div class="ems-span-2"><label for="field-display-name">EMS 顯示名稱</label><input id="field-display-name" name="display_name"></div>
                 <div>
                     <label for="field-category">能源類別</label>
-                    <select id="field-category" name="energy_category_id"><option value="">尚未分類</option>{% for item in categories %}<option value="{{ item.id }}">{{ item.name }}</option>{% endfor %}</select>
+                    <select id="field-category" name="energy_category_id"><option value="">尚未分類</option>{% for item in categories %}<option value="{{ item.id }}">{{ item.name|label }}</option>{% endfor %}</select>
                 </div>
                 <div>
                     <label for="field-measurement">測量類型</label>
-                    <select id="field-measurement" name="measurement_type_id"><option value="">尚未分類</option>{% for item in measurement_types %}<option value="{{ item.id }}">{{ item.name }}</option>{% endfor %}</select>
+                    <select id="field-measurement" name="measurement_type_id"><option value="">尚未分類</option>{% for item in measurement_types %}<option value="{{ item.id }}">{{ item.name|label }}</option>{% endfor %}</select>
                 </div>
                 <div>
                     <label for="field-unit">工程單位</label>
-                    <select id="field-unit" name="unit_id"><option value="">尚未設定</option>{% for item in units %}<option value="{{ item.id }}">{{ item.name }}</option>{% endfor %}</select>
+                    <select id="field-unit" name="unit_id"><option value="">尚未設定</option>{% for item in units %}<option value="{{ item.id }}">{{ item.name|label }}</option>{% endfor %}</select>
                 </div>
                 <div>
                     <label for="field-location">區域</label>
@@ -304,15 +316,15 @@
                 <div><label for="field-equipment">設備／系統</label><input id="field-equipment" name="equipment_name"></div>
                 <div>
                     <label for="field-value-type">數值性質</label>
-                    <select id="field-value-type" name="value_type"><option value="">尚未設定</option>{% for key, label in value_types.items() %}<option value="{{ key }}">{{ label }}</option>{% endfor %}</select>
+                    <select id="field-value-type" name="value_type"><option value="">尚未設定</option>{% for key, label in value_types.items() %}<option value="{{ key }}">{{ label|label }}</option>{% endfor %}</select>
                 </div>
                 <div>
                     <label for="field-aggregation">統計方式</label>
-                    <select id="field-aggregation" name="aggregation_method"><option value="">尚未設定</option>{% for key, label in aggregation_methods.items() %}<option value="{{ key }}">{{ label }}</option>{% endfor %}</select>
+                    <select id="field-aggregation" name="aggregation_method"><option value="">尚未設定</option>{% for key, label in aggregation_methods.items() %}<option value="{{ key }}">{{ label|label }}</option>{% endfor %}</select>
                 </div>
                 <div>
                     <label for="field-direction">流向</label>
-                    <select id="field-direction" name="flow_direction"><option value="">尚未設定</option>{% for item in flow_directions %}<option value="{{ item }}">{{ item }}</option>{% endfor %}</select>
+                    <select id="field-direction" name="flow_direction"><option value="">尚未設定</option>{% for item in flow_directions %}<option value="{{ item }}">{{ item|label }}</option>{% endfor %}</select>
                 </div>
                 <div class="ems-span-3"><label for="field-notes">備註</label><textarea id="field-notes" name="notes" rows="3"></textarea></div>
             </div>

@@ -4,10 +4,20 @@
 <h1>能源資料輸入</h1>
 
 <section class="panel">
+    <h2>選擇要填寫的月份</h2>
+    <p class="muted">選好月份後按「切換月份」，下方表格才會載入該月份資料。</p>
     <form method="get" class="form-row">
         <div>
             <label for="report_month">填報月份</label>
-            <input id="report_month" name="report_month" type="month" value="{{ report_month }}" required>
+            <input
+                id="report_month"
+                name="report_month"
+                type="month"
+                value="{{ report_month }}"
+                max="{{ max_report_month }}"
+                required
+            >
+            <div class="muted">每月填報上個月份資料；可選擇更早月份補填或修正。</div>
         </div>
         <div>
             <button class="secondary" type="submit">切換月份</button>
@@ -109,7 +119,7 @@
                 </tbody>
             </table>
         </div>
-        <button type="submit">{{ "重新送出填報資料" if is_submitted else "送出填報資料" }}</button>
+        <button type="submit">{{ ("重新送出填報資料" if is_submitted else "送出填報資料")|label }}</button>
     </form>
 {% endif %}
 {% endblock %}

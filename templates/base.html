@@ -102,6 +102,12 @@
         h1 { padding: 5px 8px; background: #000080; color: #fff; font-size: 15px; }
         h2 { font-size: 14px; }
         h3 { font-size: 13px; }
+        .query-modes { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0 14px; }
+        .query-modes a { text-decoration: none; }
+        .query-modes .query-mode-active { background: #000080; color: #fff; border-color: var(--shadow) var(--highlight) var(--highlight) var(--shadow); }
+        .query-result-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .query-chips { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0; }
+        .query-chip { border: 1px solid #777; background: #fff; padding: 5px 8px; overflow-wrap: anywhere; }
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -311,7 +317,7 @@
                 {% if messages %}
                     <div class="messages">
                         {% for category, message in messages %}
-                            <div class="message {{ category }}">{{ message }}</div>
+                            <div class="message {{ category }}">{{ message|ui }}</div>
                         {% endfor %}
                     </div>
                 {% endif %}

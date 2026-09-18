@@ -48,11 +48,11 @@
                         <td>{{ row.unit }}</td>
                         <td>{{ row.area_name }}</td>
                         <td><input style="width: auto; min-height: auto;" type="checkbox" name="quantity_enabled_{{ row.id }}" {% if row.quantity_enabled %}checked{% endif %}></td>
-                        <td>{{ "{:,.2f}".format(row.quantity_average) if row.quantity_average is not none else "尚無歷史資料" }}</td>
+                        <td>{{ "{:,.2f}".format(row.quantity_average) if row.quantity_average is not none else "尚無歷史資料"|label }}</td>
                         <td><input type="number" step="any" name="quantity_min_{{ row.id }}" value="{{ row.quantity_min if row.quantity_min is not none else '' }}"></td>
                         <td><input type="number" step="any" name="quantity_max_{{ row.id }}" value="{{ row.quantity_max if row.quantity_max is not none else '' }}"></td>
                         <td><input style="width: auto; min-height: auto;" type="checkbox" name="amount_enabled_{{ row.id }}" {% if row.amount_enabled %}checked{% endif %}></td>
-                        <td>{{ "{:,.2f}".format(row.amount_average) if row.amount_average is not none else "尚無歷史資料" }}</td>
+                        <td>{{ "{:,.2f}".format(row.amount_average) if row.amount_average is not none else "尚無歷史資料"|label }}</td>
                         <td><input type="number" step="any" name="amount_min_{{ row.id }}" value="{{ row.amount_min if row.amount_min is not none else '' }}"></td>
                         <td><input type="number" step="any" name="amount_max_{{ row.id }}" value="{{ row.amount_max if row.amount_max is not none else '' }}"></td>
                     </tr>

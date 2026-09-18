@@ -4,21 +4,28 @@ import hashlib
 import json
 import math
 import os
+import re
 import sqlite3
 import threading
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 from io import BytesIO
 from pathlib import Path
 
 from flask import Flask, flash, g, redirect, render_template, request, send_file, session, url_for
 from openpyxl import Workbook
+from jinja2 import pass_context
+from markupsafe import Markup
+if __package__:
+    from .localization import EMS_VI_TRANSLATIONS, StaticUiTranslation
+else:
+    from localization import EMS_VI_TRANSLATIONS, StaticUiTranslation
 
 
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = Path(os.environ.get("ENERGY_DATABASE_PATH", BASE_DIR / "instance" / "app.db"))
 POINT_SEED_PATH = BASE_DIR / "seed_data" / "utility_points.json"
 POINT_MANIFEST_PATH = BASE_DIR / "seed_data" / "utility_points_manifest.json"
-APP_VERSION = "0.7.0"
+APP_VERSION = "0.7.5"
 _DB_INIT_LOCK = threading.Lock()
 _INITIALIZED_DB_PATH: Path | None = None
 
@@ -37,6 +44,8 @@ VI_TRANSLATIONS = {
     "管理者預設帳號": "Tài khoản quản trị mặc định",
     "能源資料輸入": "Nhập dữ liệu năng lượng",
     "填報月份": "Tháng khai báo",
+    "每月填報上個月份資料；可選擇更早月份補填或修正。": "Mỗi tháng khai báo dữ liệu của tháng trước; có thể chọn tháng cũ hơn để bổ sung hoặc chỉnh sửa.",
+    "填報月份只能選擇上個月或更早月份。": "Chỉ có thể chọn tháng trước hoặc tháng cũ hơn để khai báo.",
     "切換月份": "Đổi tháng",
     "填報資料": "Dữ liệu khai báo",
     "此月份資料已於": "Dữ liệu tháng này đã được gửi lúc",
@@ -104,6 +113,13 @@ VI_TRANSLATIONS = {
     "輸入新密碼": "Nhập mật khẩu mới",
     "尚未建立填寫員。": "Chưa có tài khoản.",
     "指定月份（優先）": "Chọn tháng (ưu tiên)",
+    "指定月份": "Chọn tháng",
+    "起始月份": "Tháng bắt đầu",
+    "結束月份": "Tháng kết thúc",
+    "區間包含起始與結束月份，可跨年度。查詢優先順序：月份區間、指定月份、年份；全部留空則查全部資料。": "Khoảng bao gồm tháng bắt đầu và kết thúc, có thể qua nhiều năm. Ưu tiên: khoảng tháng, tháng cụ thể, năm; để trống tất cả để xem toàn bộ dữ liệu.",
+    "請同時填寫起始月份與結束月份。": "Vui lòng nhập cả tháng bắt đầu và tháng kết thúc.",
+    "月份區間格式不正確。": "Định dạng khoảng tháng không hợp lệ.",
+    "起始月份不可晚於結束月份。": "Tháng bắt đầu không được sau tháng kết thúc.",
     "或選擇年份": "Hoặc chọn năm",
     "全部年份": "Tất cả các năm",
     "查詢": "Tra cứu",
@@ -186,6 +202,9 @@ VI_TRANSLATIONS = {
 }
 
 
+VI_TRANSLATIONS.update(EMS_VI_TRANSLATIONS)
+_UI_PATTERN = re.compile("|".join(re.escape(key) for key in sorted(VI_TRANSLATIONS, key=len, reverse=True)))
+
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("ENERGY_SECRET_KEY", "dev-secret-change-me")
 
@@ -204,20 +223,22 @@ def inject_app_version() -> dict[str, str]:
     }
 
 
-@app.after_request
-def translate_html_response(response):
-    if (
-        session.get("language") == "vi"
-        and response.content_type
-        and response.content_type.startswith("text/html")
-    ):
-        html = response.get_data(as_text=True)
-        for chinese, vietnamese in sorted(
-            VI_TRANSLATIONS.items(), key=lambda item: len(item[0]), reverse=True
-        ):
-            html = html.replace(chinese, vietnamese)
-        response.set_data(html)
-    return response
+def translate_ui_text(text: str) -> str:
+    if session.get("language") == "vi":
+        return _UI_PATTERN.sub(lambda match: VI_TRANSLATIONS[match.group()], str(text))
+    return str(text)
+
+
+@pass_context
+def translate_static_ui(context, text: str) -> Markup:
+    # This filter is injected only for literal, trusted template source.
+    return Markup(translate_ui_text(text))
+
+
+app.jinja_env.filters["ui_static"] = translate_static_ui
+app.jinja_env.filters["ui"] = pass_context(lambda context, text: translate_ui_text(text))
+app.jinja_env.filters["label"] = pass_context(lambda context, text: translate(text))
+app.jinja_env.add_extension(StaticUiTranslation)
 
 
 @app.route("/language/<language>", methods=["POST"])
@@ -264,7 +285,14 @@ DEFAULT_AREAS = [
 
 
 def current_report_month() -> str:
-    return date.today().strftime("%Y-%m")
+    bangkok_time = datetime.now(timezone(timedelta(hours=7)))
+    return bangkok_time.strftime("%Y-%m")
+
+
+def latest_report_month(today: date | None = None) -> str:
+    reference = today or datetime.now(timezone(timedelta(hours=7))).date()
+    first_day_of_month = reference.replace(day=1)
+    return (first_day_of_month - timedelta(days=1)).strftime("%Y-%m")
 
 
 def valid_report_month(value: str) -> bool:
@@ -995,10 +1023,10 @@ def admin_dashboard():
         return guard
 
     db = get_db()
-    report_month = request.args.get("report_month", "").strip() or current_report_month()
+    report_month = request.args.get("report_month", "").strip() or latest_report_month()
     if not valid_report_month(report_month):
         flash("分析月份格式不正確。", "danger")
-        return redirect(url_for("admin_dashboard", report_month=current_report_month()))
+        return redirect(url_for("admin_dashboard", report_month=latest_report_month()))
 
     previous_month = previous_report_month(report_month)
     current_amount = db.execute(
@@ -1573,6 +1601,22 @@ def admin_ems_points():
 
     db = get_db()
     filters, params, filter_values = ems_point_filters()
+    active_filters = []
+    if filter_values["q"]:
+        active_filters.append(("搜尋點位", filter_values["q"]))
+    if filter_values["monitor"] in {"on", "off"}:
+        active_filters.append(("監控狀態", translate("監控中") if filter_values["monitor"] == "on" else translate("不監控")))
+    status_labels = {
+        "complete": "分類完成", "incomplete": "尚未分類", "issue": "來源有問題",
+        "no_limit": "尚未設定門檻", "source_missing": "來源已不存在",
+    }
+    if filter_values["status"] in status_labels:
+        active_filters.append(("資料狀態", translate(status_labels[filter_values["status"]])))
+    for key, table, label in [("category_id", "ems_energy_categories", "能源類別"), ("location_id", "ems_locations", "區域")]:
+        if filter_values[key].isdigit():
+            lookup = db.execute(f"SELECT name FROM {table} WHERE id = ?", (int(filter_values[key]),)).fetchone()
+            value = lookup[0] if lookup else filter_values[key]
+            active_filters.append((label, translate(value) if key == "category_id" else value))
     where_sql = " AND ".join(filters)
     try:
         page = max(int(request.args.get("page", "1")), 1)
@@ -1624,6 +1668,7 @@ def admin_ems_points():
         point_payloads=[dict(row) for row in point_rows],
         stats=stats,
         filters=filter_values,
+        active_filters=active_filters,
         categories=ems_lookup_rows("ems_energy_categories"),
         measurement_types=ems_lookup_rows("ems_measurement_types"),
         units=ems_lookup_rows("ems_units"),
@@ -1702,7 +1747,10 @@ def update_ems_point(point_id: int):
         if deadband is not None and deadband < 0:
             raise ValueError("告警緩衝值不可小於零。")
         consecutive_raw = request.form.get("alarm_consecutive_samples", "1").strip()
-        consecutive_samples = int(consecutive_raw or "1")
+        try:
+            consecutive_samples = int(consecutive_raw or "1")
+        except (ValueError, OverflowError) as exc:
+            raise ValueError("連續異常次數必須介於 1 到 168 次。") from exc
         if consecutive_samples < 1 or consecutive_samples > 168:
             raise ValueError("連續異常次數必須介於 1 到 168 次。")
         category_id = optional_lookup_id(db, "energy_category_id", "ems_energy_categories", "能源類別")
@@ -1842,21 +1890,22 @@ def export_ems_points():
     if guard:
         return guard
 
+    filters, params, _ = ems_point_filters()
     rows = get_db().execute(
-        ems_point_select_sql("dp.data_source_id = ?") + " ORDER BY dp.external_id",
-        (1,),
+        ems_point_select_sql(" AND ".join(filters)) + " ORDER BY dp.external_id",
+        params,
     ).fetchall()
     workbook = Workbook()
     sheet = workbook.active
     sheet.title = "EMS Point Config"
-    sheet.append([
-        "DataSourceId", "ExternalPointId", "PointName", "JsonPath", "Description",
-        "SourcePresent", "MonitorEnabled", "LowerLimit", "UpperLimit", "DisplayName",
-        "EnergyCategory", "MeasurementType", "Unit", "Location", "Equipment",
-        "ValueType", "AggregationMethod", "FlowDirection", "AlarmSeverity",
-        "AlarmValueMode", "AlarmConsecutiveSamples", "AlarmDeadband", "Notes",
-        "UpdatedBy", "UpdatedAt",
-    ])
+    sheet.append([translate(label) for label in [
+        "DataSourceId", "外部 Id", "PointName", "JsonPath", "來源說明",
+        "來源存在", "是否監控", "下限", "上限", "顯示名稱",
+        "能源類別", "測量類型", "工程單位", "區域", "設備／系統",
+        "數值性質", "統計方式", "流向", "告警等級",
+        "告警判斷值", "連續異常次數", "告警緩衝值", "備註",
+        "更新者", "更新時間",
+    ]])
     for row in rows:
         sheet.append([
             row["data_source_id"], row["external_id"], row["point_name"], row["json_path"],
@@ -1902,10 +1951,14 @@ def fill_report():
         request.form.get("report_month", "").strip()
         if request.method == "POST"
         else request.args.get("report_month", "").strip()
-    ) or current_report_month()
+    ) or latest_report_month()
     if not valid_report_month(report_month):
         flash("填報月份格式不正確。", "danger")
-        return redirect(url_for("fill_report", report_month=current_report_month()))
+        return redirect(url_for("fill_report", report_month=latest_report_month()))
+    max_report_month = latest_report_month()
+    if report_month > max_report_month:
+        flash("填報月份只能選擇上個月或更早月份。", "danger")
+        return redirect(url_for("fill_report", report_month=max_report_month))
 
     energy_types = db.execute(
         """
@@ -2020,6 +2073,7 @@ def fill_report():
     return render_template(
         "fill_report.html",
         report_month=report_month,
+        max_report_month=max_report_month,
         energy_types=energy_types,
         areas=areas,
         entries=entries,
@@ -2029,10 +2083,13 @@ def fill_report():
     )
 
 
-def report_rows(report_month: str, report_year: str) -> list[sqlite3.Row]:
+def report_rows(report_month: str, report_year: str, start_month: str = "", end_month: str = "") -> list[sqlite3.Row]:
     filters = []
     params = []
-    if report_month:
+    if start_month and end_month:
+        filters.append("ee.report_month BETWEEN ? AND ?")
+        params.extend([start_month, end_month])
+    elif report_month:
         filters.append("ee.report_month = ?")
         params.append(report_month)
     elif report_year:
@@ -2065,14 +2122,40 @@ def report_rows(report_month: str, report_year: str) -> list[sqlite3.Row]:
     ).fetchall()
 
 
-def report_filters() -> tuple[str, str]:
+def report_filters() -> tuple[str, str, str, str]:
     report_month = request.args.get("report_month", "").strip()
     report_year = request.args.get("report_year", "").strip()
-    if report_month and not valid_report_month(report_month):
-        report_month = ""
-    if report_year and (len(report_year) != 4 or not report_year.isdigit()):
-        report_year = ""
-    return report_month, report_year
+    start_month = request.args.get("start_month", "").strip()
+    end_month = request.args.get("end_month", "").strip()
+    mode = request.args.get("mode", "").strip()
+    if not mode:
+        # Old links with one unambiguous condition remain usable.
+        choices = [name for name, present in (
+            ("month", bool(report_month)), ("year", bool(report_year)),
+            ("range", bool(start_month or end_month)),
+        ) if present]
+        if len(choices) > 1:
+            raise ValueError("查詢條件混用了不同方式，請先選擇一種查詢方式。")
+        mode = choices[0] if choices else "all"
+    if mode == "range":
+        if not start_month or not end_month:
+            raise ValueError("請同時填寫起始月份與結束月份。")
+        if not valid_report_month(start_month) or not valid_report_month(end_month):
+            raise ValueError("月份區間格式不正確。")
+        if start_month > end_month:
+            raise ValueError("起始月份不可晚於結束月份。")
+        return "", "", start_month, end_month
+    if mode == "month":
+        if not report_month or not valid_report_month(report_month):
+            raise ValueError("請選擇有效的查詢月份。")
+        return report_month, "", "", ""
+    if mode == "year":
+        if not re.fullmatch(r"[0-9]{4}", report_year) or not 1 <= int(report_year) <= 9999:
+            raise ValueError("請選擇有效的查詢年份。")
+        return "", report_year, "", ""
+    if mode == "all":
+        return "", "", "", ""
+    raise ValueError("查詢方式不正確，請重新選擇。")
 
 
 @app.route("/reports", methods=["GET"])
@@ -2082,22 +2165,40 @@ def admin_reports():
     if guard:
         return guard
 
-    report_month, report_year = report_filters()
-    years = [
-        row[0] for row in get_db().execute(
-            """
-            SELECT DISTINCT substr(report_month, 1, 4) AS year
-            FROM energy_entries ORDER BY year DESC
-            """
-        ).fetchall()
-    ]
+    available_months = [row[0] for row in get_db().execute(
+        "SELECT DISTINCT report_month FROM energy_entries ORDER BY report_month DESC"
+    ).fetchall()]
+    years = sorted({month[:4] for month in available_months} | {latest_report_month()[:4]}, reverse=True)
+    filter_error = False
+    try:
+        report_month, report_year, start_month, end_month = report_filters()
+    except ValueError as exc:
+        flash(str(exc), "danger")
+        filter_error = True
+        report_month, report_year, start_month, end_month = (
+            request.args.get(key, "").strip() for key in
+            ("report_month", "report_year", "start_month", "end_month")
+        )
+    mode = request.args.get("mode") or (
+        "range" if start_month or end_month else "month" if report_month else "year" if report_year else "all"
+    )
+    if mode not in {"month", "range", "year", "all"}:
+        mode = "month"
+    if re.fullmatch(r"[0-9]{4}", report_year) and report_year not in years:
+        years = sorted([*years, report_year], reverse=True)
     return render_template(
         "admin_reports.html",
+        mode=mode,
+        filter_error=filter_error,
+        default_month=latest_report_month(),
+        available_months=available_months,
         report_month=report_month,
         report_year=report_year,
+        start_month=start_month,
+        end_month=end_month,
         years=years,
-        rows=report_rows(report_month, report_year),
-    )
+        rows=[] if filter_error else report_rows(report_month, report_year, start_month, end_month),
+    ), 400 if filter_error else 200
 
 
 @app.route("/reports/export", methods=["GET"])
@@ -2106,7 +2207,10 @@ def export_reports():
     if guard:
         return guard
 
-    report_month, report_year = report_filters()
+    try:
+        report_month, report_year, start_month, end_month = report_filters()
+    except ValueError:
+        return admin_reports()
     workbook = Workbook()
     sheet = workbook.active
     sheet.title = translate("能源填報資料")
@@ -2115,7 +2219,7 @@ def export_reports():
         translate("能源單位"), translate("區域"), translate("數量"),
         translate("金額(未稅)"), translate("送出時間"), translate("更新時間"),
     ])
-    for row in report_rows(report_month, report_year):
+    for row in report_rows(report_month, report_year, start_month, end_month):
         sheet.append([
             row["report_month"], row["display_name"], row["energy_name"], row["unit"],
             row["area_name"], row["quantity"], row["amount"],
@@ -2130,7 +2234,7 @@ def export_reports():
     output = BytesIO()
     workbook.save(output)
     output.seek(0)
-    suffix = report_month or report_year or "all"
+    suffix = f"{start_month}_to_{end_month}" if start_month else report_month or report_year or "all"
     return send_file(
         output,
         as_attachment=True,

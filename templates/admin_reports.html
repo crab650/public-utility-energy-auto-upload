@@ -4,28 +4,82 @@
 <h1>填報查詢</h1>
 
 <section class="panel">
-    <form method="get" class="form-row">
+    <h2>選擇查詢方式（四選一）</h2>
+    <p class="muted">只需填寫所選方式的欄位，不會與其他方式混用。</p>
+    <nav class="query-modes" aria-label="查詢方式">
+        {% for key, title in [('month', '單月'), ('range', '月份區間'), ('year', '整年'), ('all', '全部資料')] %}
+            {% if key == 'month' %}{% set link = url_for('admin_reports', mode=key, report_month=default_month) %}
+            {% elif key == 'range' %}{% set link = url_for('admin_reports', mode=key, start_month=default_month, end_month=default_month) %}
+            {% elif key == 'year' %}{% set link = url_for('admin_reports', mode=key, report_year=default_month[:4]) %}
+            {% else %}{% set link = url_for('admin_reports', mode=key) %}{% endif %}
+            <a class="button {% if mode == key %}query-mode-active{% else %}secondary{% endif %}" href="{{ link }}" {% if mode == key %}aria-current="page"{% endif %}>{{ title|label }}</a>
+        {% endfor %}
+    </nav>
+    {% if mode != 'all' %}
+    <form method="get" action="{{ url_for('admin_reports') }}" class="form-row">
+        <input type="hidden" name="mode" value="{{ mode }}">
+        {% if mode == 'range' %}
         <div>
-            <label for="report_month">指定月份（優先）</label>
-            <input id="report_month" name="report_month" type="month" value="{{ report_month }}">
+            <label for="start_month">起始月份</label>
+            <input id="start_month" name="start_month" type="month" value="{{ start_month }}" required>
         </div>
         <div>
-            <label for="report_year">或選擇年份</label>
-            <select id="report_year" name="report_year">
-                <option value="">全部年份</option>
+            <label for="end_month">結束月份</label>
+            <input id="end_month" name="end_month" type="month" value="{{ end_month }}" required>
+        </div>
+        {% elif mode == 'month' %}
+        <div>
+            <label for="report_month">指定月份</label>
+            <input id="report_month" name="report_month" type="month" value="{{ report_month }}" required>
+        </div>
+        {% elif mode == 'year' %}
+        <div>
+            <label for="report_year">查詢年份</label>
+            <select id="report_year" name="report_year" required>
+                <option value="">請選擇年份</option>
                 {% for year in years %}
                     <option value="{{ year }}" {% if report_year == year %}selected{% endif %}>{{ year }} 年</option>
                 {% endfor %}
             </select>
         </div>
+        {% endif %}
         <div>
-            <button class="secondary" type="submit">查詢</button>
-            <a class="button secondary" href="{{ url_for('admin_reports') }}">全部資料</a>
-            <a class="button" href="{{ url_for('export_reports', report_month=report_month, report_year=report_year) }}">匯出 Excel</a>
+            <button type="submit">套用查詢</button>
         </div>
     </form>
+    {% endif %}
+    {% if mode == 'range' %}<p class="muted">起始與結束月份需一起填寫，包含首尾月份，可跨年度。</p>{% endif %}
+    <p class="muted">依資料所屬月份查詢，不是依送出時間或更新時間查詢。</p>
 </section>
 
+<section class="panel">
+    {% if filter_error %}
+        <p role="alert">查詢尚未執行，請修正上方條件。</p>
+    {% else %}
+        <div class="query-result-heading">
+            <strong>目前結果：
+                {% if mode == 'month' %}單月 {{ report_month }}
+                {% elif mode == 'range' %}月份區間 {{ start_month }} ～ {{ end_month }}
+                {% elif mode == 'year' %}整年 {{ report_year }}
+                {% else %}全部資料{% endif %}
+                ・{{ rows|length }} 筆
+            </strong>
+            <a class="button secondary" href="{{ url_for('export_reports', mode=mode, report_month=report_month, report_year=report_year, start_month=start_month, end_month=end_month) }}">匯出目前結果</a>
+        </div>
+        <p class="muted">修改條件後請按「套用查詢」；下方資料與匯出皆以目前結果為準。</p>
+        {% if not rows %}<p>此範圍沒有填報紀錄，請核對下方已有紀錄的月份。</p>{% endif %}
+    {% endif %}
+    <details {% if not rows %}open{% endif %}>
+        <summary>已有填報紀錄的月份</summary>
+        <div class="query-modes">
+            {% for month in available_months %}
+                <a class="button secondary" href="{{ url_for('admin_reports', mode='month', report_month=month) }}">{{ month }}</a>
+            {% else %}<span class="muted">目前尚無任何填報紀錄。</span>{% endfor %}
+        </div>
+    </details>
+</section>
+
+{% if not filter_error %}
 <section class="panel table-wrap">
     <table>
         <thead>
@@ -60,4 +114,5 @@
         </tbody>
     </table>
 </section>
+{% endif %}
 {% endblock %}
