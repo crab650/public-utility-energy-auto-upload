@@ -1,0 +1,952 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>EMS 公用點位設定 Demo</title>
+    <style>
+        :root {
+            --page: #008080;
+            --panel: #c0c0c0;
+            --primary: #000080;
+            --primary-light: #1084d0;
+            --highlight: #ffffff;
+            --shadow: #404040;
+            --border: #808080;
+            --muted: #4b4b4b;
+            --danger: #8b1e1e;
+            --warning: #8a5300;
+            --success: #075f2c;
+            --info-bg: #e9f4ff;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-width: 320px;
+            background: var(--page);
+            color: #000;
+            font-family: Tahoma, "Microsoft JhengHei", "MS Sans Serif", sans-serif;
+            font-size: 13px;
+        }
+
+        button, input, select, textarea { font: inherit; }
+        button, .button {
+            min-height: 34px;
+            padding: 6px 12px;
+            border: 2px solid;
+            border-color: var(--highlight) var(--shadow) var(--shadow) var(--highlight);
+            background: var(--panel);
+            color: #000;
+            cursor: pointer;
+            box-shadow: 1px 1px 0 #000;
+        }
+        button:active {
+            border-color: var(--shadow) var(--highlight) var(--highlight) var(--shadow);
+            box-shadow: none;
+            transform: translate(1px, 1px);
+        }
+        button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+            outline: 2px solid #ffb000;
+            outline-offset: 1px;
+        }
+        button.primary { background: var(--primary); color: #fff; font-weight: 700; }
+        button.danger { background: #f5d2d2; color: var(--danger); }
+        button.small { min-height: 28px; padding: 3px 9px; }
+        button:disabled { color: #777; cursor: not-allowed; box-shadow: none; }
+
+        input, select, textarea {
+            width: 100%;
+            min-height: 34px;
+            padding: 6px 8px;
+            border: 2px solid;
+            border-color: var(--shadow) var(--highlight) var(--highlight) var(--shadow);
+            border-radius: 0;
+            background: #fff;
+            color: #000;
+        }
+        input:focus, select:focus, textarea:focus { background: #ffffcf; }
+        input[type="checkbox"] { width: auto; min-height: auto; }
+        textarea { min-height: 78px; resize: vertical; }
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 4px;
+            background: var(--panel);
+            border: 2px solid;
+            border-color: var(--highlight) var(--shadow) var(--shadow) var(--highlight);
+        }
+        .brand {
+            flex: 1;
+            padding: 7px 10px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+            color: #fff;
+            font-size: 15px;
+            font-weight: 700;
+        }
+        .version {
+            margin-left: 8px;
+            padding: 1px 5px;
+            border: 1px solid #fff;
+            font-size: 11px;
+            font-weight: 400;
+        }
+        nav { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+        nav a {
+            padding: 6px 8px;
+            color: #000;
+            text-decoration: none;
+            border: 1px solid transparent;
+        }
+        nav a.active { background: var(--primary); color: #fff; font-weight: 700; }
+        nav .user { padding: 0 4px; color: var(--muted); }
+
+        main { padding: 12px; }
+        .container {
+            max-width: 1500px;
+            margin: 0 auto;
+            padding: 8px;
+            background: var(--panel);
+            border: 2px solid;
+            border-color: var(--highlight) var(--shadow) var(--shadow) var(--highlight);
+            box-shadow: 2px 2px 0 #003f3f;
+        }
+        h1 {
+            margin: 0 0 10px;
+            padding: 7px 9px;
+            background: var(--primary);
+            color: #fff;
+            font-size: 15px;
+        }
+        h2 { margin: 0 0 8px; font-size: 14px; }
+        p { margin: 5px 0; }
+        .muted { color: var(--muted); }
+
+        .demo-notice {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 10px;
+            padding: 9px 11px;
+            background: #fff8cf;
+            border: 2px solid;
+            border-color: #fff7b5 #8a6d00 #8a6d00 #fff7b5;
+        }
+        .demo-notice strong { color: #6d4800; }
+
+        .kpis {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(130px, 1fr));
+            gap: 9px;
+            margin-bottom: 10px;
+        }
+        .kpi {
+            padding: 9px 10px;
+            background: var(--panel);
+            border: 2px solid;
+            border-color: var(--highlight) var(--shadow) var(--shadow) var(--highlight);
+        }
+        .kpi strong { display: block; margin: 5px 0 2px; font-size: 22px; }
+        .kpi.primary { background: var(--primary); color: #fff; }
+        .kpi.warning { background: #fff2bf; }
+        .kpi.danger { background: #fbe3e3; }
+        .kpi small { color: inherit; opacity: .78; }
+
+        .panel {
+            margin-bottom: 10px;
+            padding: 10px;
+            background: var(--panel);
+            border: 2px solid;
+            border-color: var(--shadow) var(--highlight) var(--highlight) var(--shadow);
+        }
+        .filters {
+            display: grid;
+            grid-template-columns: minmax(230px, 1.7fr) repeat(4, minmax(130px, 1fr)) auto;
+            gap: 9px;
+            align-items: end;
+        }
+        label { display: block; margin-bottom: 5px; font-weight: 700; }
+        .label-help { font-weight: 400; color: var(--muted); }
+
+        .bulk-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            min-height: 48px;
+            margin-bottom: 10px;
+            padding: 7px 9px;
+            background: #e7e7e7;
+            border: 1px solid var(--border);
+        }
+        .bulk-bar strong { margin-right: auto; }
+        .bulk-bar select { width: 170px; min-height: 32px; }
+
+        .table-shell {
+            max-height: 610px;
+            overflow: auto;
+            background: #fff;
+            border: 2px solid;
+            border-color: var(--shadow) var(--highlight) var(--highlight) var(--shadow);
+        }
+        table { width: 100%; min-width: 1260px; border-collapse: collapse; }
+        th, td {
+            padding: 6px;
+            border: 1px solid var(--border);
+            text-align: left;
+            vertical-align: middle;
+        }
+        th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: var(--panel);
+            border-color: var(--highlight) var(--shadow) var(--shadow) var(--highlight);
+            white-space: nowrap;
+        }
+        tbody tr:nth-child(even) td { background: #f0f0f0; }
+        tbody tr:hover td { background: #e7f3ff; }
+        tbody tr.selected td { background: #dbeaff; }
+        tbody tr.issue-row td:first-child { box-shadow: inset 4px 0 #b54708; }
+        .check-cell { width: 34px; text-align: center; }
+        .id-cell { width: 58px; font-variant-numeric: tabular-nums; }
+        .point-cell { min-width: 205px; font-family: Consolas, monospace; font-size: 12px; }
+        .description-cell { min-width: 155px; max-width: 220px; }
+        .limit-cell { width: 92px; }
+        .limit-cell input { min-width: 82px; min-height: 29px; padding: 3px 5px; text-align: right; }
+        .action-cell { width: 80px; text-align: center; }
+        .empty-value { color: #9b2c2c; font-style: italic; }
+        .ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 6px;
+            border: 1px solid #777;
+            background: #eee;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .badge.success { color: var(--success); background: #e1f5e8; border-color: #65a87d; }
+        .badge.warning { color: var(--warning); background: #fff2bf; border-color: #c69230; }
+        .badge.danger { color: var(--danger); background: #fbe3e3; border-color: #c97a7a; }
+        .badge.info { color: #004878; background: var(--info-bg); border-color: #76a9cf; }
+        .badge::before { content: ""; width: 6px; height: 6px; background: currentColor; }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 42px;
+            height: 22px;
+            vertical-align: middle;
+        }
+        .switch input { width: 1px; height: 1px; opacity: 0; }
+        .switch span {
+            position: absolute;
+            inset: 0;
+            background: #777;
+            border: 2px inset #aaa;
+            cursor: pointer;
+        }
+        .switch span::after {
+            content: "";
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 14px;
+            height: 14px;
+            background: #fff;
+            border: 1px solid #333;
+            transition: transform .12s;
+        }
+        .switch input:checked + span { background: #148044; }
+        .switch input:checked + span::after { transform: translateX(18px); }
+
+        .footer-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .pager { display: flex; align-items: center; gap: 5px; }
+        .pager button.active { background: var(--primary); color: #fff; }
+
+        dialog {
+            width: min(900px, calc(100vw - 24px));
+            max-height: calc(100vh - 30px);
+            padding: 0;
+            border: 2px solid;
+            border-color: var(--highlight) var(--shadow) var(--shadow) var(--highlight);
+            background: var(--panel);
+            color: #000;
+            box-shadow: 5px 5px 0 rgba(0, 0, 0, .45);
+        }
+        dialog::backdrop { background: rgba(0, 0, 0, .55); }
+        .dialog-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 8px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+            color: #fff;
+            font-weight: 700;
+        }
+        .dialog-title button {
+            width: 26px;
+            min-height: 24px;
+            padding: 0;
+            background: var(--panel);
+            color: #000;
+        }
+        .dialog-body { max-height: calc(100vh - 125px); overflow: auto; padding: 12px; }
+        .source-card {
+            margin-bottom: 12px;
+            padding: 9px;
+            background: #efefef;
+            border: 1px solid var(--border);
+        }
+        .source-grid {
+            display: grid;
+            grid-template-columns: 90px minmax(180px, 1fr) minmax(180px, 1fr);
+            gap: 8px 12px;
+        }
+        .source-grid code { overflow-wrap: anywhere; font-size: 12px; }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 11px;
+        }
+        .span-2 { grid-column: span 2; }
+        .span-3 { grid-column: 1 / -1; }
+        .monitor-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-height: 34px;
+            padding: 5px 8px;
+            background: #fff;
+            border: 2px inset #ddd;
+        }
+        .monitor-box label { margin: 0; }
+        .dialog-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            padding: 9px 12px;
+            border-top: 1px solid var(--border);
+        }
+        .validation {
+            display: none;
+            margin-bottom: 10px;
+            padding: 8px;
+            color: var(--danger);
+            background: #fbe3e3;
+            border: 1px solid #c97a7a;
+        }
+
+        .toast {
+            position: fixed;
+            right: 18px;
+            bottom: 18px;
+            z-index: 50;
+            display: none;
+            max-width: 380px;
+            padding: 11px 14px;
+            color: #fff;
+            background: #075f2c;
+            border: 2px solid;
+            border-color: #b8efca #002d14 #002d14 #b8efca;
+            box-shadow: 3px 3px 0 rgba(0, 0, 0, .45);
+        }
+
+        @media (max-width: 1050px) {
+            .kpis { grid-template-columns: repeat(3, 1fr); }
+            .filters { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 720px) {
+            header { position: static; align-items: stretch; flex-direction: column; }
+            nav { display: none; }
+            main { padding: 6px; }
+            .kpis { grid-template-columns: 1fr 1fr; }
+            .filters { grid-template-columns: 1fr 1fr; }
+            .filters .search-field { grid-column: 1 / -1; }
+            .form-grid, .source-grid { grid-template-columns: 1fr; }
+            .span-2, .span-3 { grid-column: auto; }
+            .demo-notice, .footer-bar { align-items: stretch; flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="brand">能源資料填報系統 <span class="version">EMS Demo</span></div>
+        <nav aria-label="管理選單">
+            <a href="#">管理首頁</a>
+            <a href="#">帳號權限管理</a>
+            <a href="#">能源/區域維護</a>
+            <a class="active" href="#">EMS 點位設定</a>
+            <a href="#">填報查詢</a>
+            <span class="user">系統管理者</span>
+            <button class="small">登出</button>
+        </nav>
+    </header>
+
+    <main>
+        <div class="container">
+            <h1>EMS 公用點位設定</h1>
+
+            <div class="demo-notice">
+                <div><strong>畫面 Demo：</strong>資料取自 UtilityDepartment 點位範例；操作只會暫存在瀏覽器，不會寫入資料庫。</div>
+                <button class="small" id="reset-demo">還原 Demo 資料</button>
+            </div>
+
+            <section class="kpis" aria-label="點位摘要">
+                <div class="kpi primary"><span>公用點位</span><strong>388</strong><small>DataSourceId = 1</small></div>
+                <div class="kpi"><span>啟用監控</span><strong id="kpi-monitored">386</strong><small>預設全部啟用</small></div>
+                <div class="kpi"><span>已設定門檻</span><strong id="kpi-limits">147</strong><small>至少有一個上下限</small></div>
+                <div class="kpi warning"><span>尚未完成分類</span><strong>241</strong><small>等待使用者補充資料</small></div>
+                <div class="kpi danger"><span>來源資料問題</span><strong>27</strong><small>缺值、重複或疑似亂碼</small></div>
+            </section>
+
+            <section class="panel">
+                <h2>搜尋與篩選</h2>
+                <div class="filters">
+                    <div class="search-field">
+                        <label for="search">搜尋點位 <span class="label-help">PointName、JsonPath、Description</span></label>
+                        <input id="search" type="search" placeholder="例如：FQI、WWT、U_4K">
+                    </div>
+                    <div>
+                        <label for="monitor-filter">監控狀態</label>
+                        <select id="monitor-filter">
+                            <option value="all">全部</option>
+                            <option value="on">監控中</option>
+                            <option value="off">不監控</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="category-filter">能源類別</label>
+                        <select id="category-filter">
+                            <option value="all">全部類別</option>
+                            <option value="未分類">未分類</option>
+                            <option value="壓縮空氣">壓縮空氣</option>
+                            <option value="氮氣">氮氣</option>
+                            <option value="冰水">冰水</option>
+                            <option value="用水">用水</option>
+                            <option value="廢水">廢水</option>
+                            <option value="環境指標">環境指標</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="status-filter">資料狀態</label>
+                        <select id="status-filter">
+                            <option value="all">全部狀態</option>
+                            <option value="complete">分類完成</option>
+                            <option value="incomplete">尚未分類</option>
+                            <option value="issue">來源有問題</option>
+                            <option value="no-limit">尚未設定門檻</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="area-filter">區域</label>
+                        <select id="area-filter">
+                            <option value="all">全部區域</option>
+                            <option value="Utility">Utility</option>
+                            <option value="POY">POY</option>
+                            <option value="DTY">DTY</option>
+                            <option value="SSP">SSP</option>
+                            <option value="WWT">WWT</option>
+                            <option value="4ha">4ha</option>
+                        </select>
+                    </div>
+                    <button id="clear-filter">清除條件</button>
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="bulk-bar">
+                    <strong><span id="selected-count">0</span> 筆已選取</strong>
+                    <select id="bulk-category" aria-label="批次能源類別">
+                        <option value="">批次設定類別…</option>
+                        <option>壓縮空氣</option>
+                        <option>氮氣</option>
+                        <option>冰水</option>
+                        <option>用水</option>
+                        <option>廢水</option>
+                        <option>環境指標</option>
+                    </select>
+                    <button class="small" id="bulk-apply">套用類別</button>
+                    <button class="small" id="bulk-monitor-on">啟用監控</button>
+                    <button class="small" id="bulk-monitor-off">停止監控</button>
+                    <button class="small" id="export-demo">匯出 Excel</button>
+                </div>
+
+                <div class="table-shell">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="check-cell"><input id="select-all" type="checkbox" aria-label="全選"></th>
+                                <th>外部 Id</th>
+                                <th>PointName</th>
+                                <th>JsonPath</th>
+                                <th>Description</th>
+                                <th>監控</th>
+                                <th>下限</th>
+                                <th>上限</th>
+                                <th>能源類別</th>
+                                <th>測量類型</th>
+                                <th>單位</th>
+                                <th>區域</th>
+                                <th>狀態</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="point-rows"></tbody>
+                    </table>
+                </div>
+
+                <div class="footer-bar">
+                    <span id="result-summary" class="muted">顯示 10 筆 Demo 資料，共 388 個公用點位</span>
+                    <div class="pager" aria-label="分頁">
+                        <button class="small" disabled>上一頁</button>
+                        <button class="small active">1</button>
+                        <button class="small">2</button>
+                        <button class="small">3</button>
+                        <span>…</span>
+                        <button class="small">39</button>
+                        <button class="small">下一頁</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <dialog id="edit-dialog">
+        <div class="dialog-title">
+            <span>編輯 EMS 點位設定</span>
+            <button id="close-dialog" type="button" aria-label="關閉">×</button>
+        </div>
+        <form id="edit-form">
+            <div class="dialog-body">
+                <div id="validation-message" class="validation"></div>
+                <div class="source-card">
+                    <h2>來源點位資料（唯讀）</h2>
+                    <div class="source-grid">
+                        <div><strong>外部 Id</strong><br><span id="view-id"></span></div>
+                        <div><strong>PointName</strong><br><code id="view-point-name"></code></div>
+                        <div><strong>JsonPath</strong><br><code id="view-json-path"></code></div>
+                        <div><strong>資料來源</strong><br>UtilityDepartment</div>
+                        <div class="span-2"><strong>Description</strong><br><span id="view-description"></span></div>
+                    </div>
+                </div>
+
+                <h2>監控與門檻</h2>
+                <div class="form-grid">
+                    <div>
+                        <label>是否監控</label>
+                        <div class="monitor-box">
+                            <label class="switch">
+                                <input id="edit-monitor" type="checkbox">
+                                <span></span>
+                            </label>
+                            <strong id="monitor-label">監控中</strong>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="edit-lower">下限</label>
+                        <input id="edit-lower" type="number" step="any" placeholder="未設定">
+                    </div>
+                    <div>
+                        <label for="edit-upper">上限</label>
+                        <input id="edit-upper" type="number" step="any" placeholder="未設定">
+                    </div>
+                    <div>
+                        <label for="edit-severity">告警等級</label>
+                        <select id="edit-severity">
+                            <option value="warning">警告</option>
+                            <option value="critical">嚴重</option>
+                            <option value="info">提示</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="edit-value-mode">告警判斷值</label>
+                        <select id="edit-value-mode">
+                            <option value="raw">原始讀值</option>
+                            <option value="interval_delta">每次收集差值</option>
+                            <option value="change_rate">變化率</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="edit-consecutive">連續異常次數</label>
+                        <input id="edit-consecutive" type="number" min="1" max="168" step="1" value="1">
+                    </div>
+                    <div>
+                        <label for="edit-deadband">告警解除緩衝（Deadband）</label>
+                        <input id="edit-deadband" type="number" min="0" step="any" value="0">
+                    </div>
+                </div>
+
+                <h2 style="margin-top: 16px;">EMS 分類</h2>
+                <div class="form-grid">
+                    <div class="span-2">
+                        <label for="edit-display-name">EMS 顯示名稱</label>
+                        <input id="edit-display-name" placeholder="例如：Utility 4K 總流量">
+                    </div>
+                    <div>
+                        <label for="edit-category">能源類別</label>
+                        <select id="edit-category">
+                            <option value="未分類">尚未分類</option>
+                            <option value="壓縮空氣">壓縮空氣</option>
+                            <option value="氮氣">氮氣</option>
+                            <option value="冰水">冰水</option>
+                            <option value="冷卻水">冷卻水</option>
+                            <option value="用水">用水</option>
+                            <option value="廢水">廢水</option>
+                            <option value="電力">電力</option>
+                            <option value="環境指標">環境指標</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="edit-measurement">測量類型</label>
+                        <select id="edit-measurement">
+                            <option value="未分類">尚未分類</option>
+                            <option value="累積流量">累積流量</option>
+                            <option value="瞬時流量">瞬時流量</option>
+                            <option value="壓力">壓力</option>
+                            <option value="溫度">溫度</option>
+                            <option value="功率">功率</option>
+                            <option value="運轉狀態">運轉狀態</option>
+                            <option value="COD">COD</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="edit-unit">工程單位</label>
+                        <select id="edit-unit">
+                            <option value="">尚未設定</option>
+                            <option>m³/h</option>
+                            <option>m³</option>
+                            <option>bar</option>
+                            <option>°C</option>
+                            <option>kW</option>
+                            <option>kWh</option>
+                            <option>mg/L</option>
+                            <option>狀態</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="edit-area">區域</label>
+                        <select id="edit-area">
+                            <option value="">尚未設定</option>
+                            <option>Utility</option>
+                            <option>POY</option>
+                            <option>DTY</option>
+                            <option>SSP</option>
+                            <option>WWT</option>
+                            <option>4ha</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="edit-equipment">設備／系統</label>
+                        <input id="edit-equipment" placeholder="例如：U-G706-A">
+                    </div>
+                    <div>
+                        <label for="edit-value-type">數值性質</label>
+                        <select id="edit-value-type">
+                            <option value="">尚未設定</option>
+                            <option value="instantaneous">瞬時值</option>
+                            <option value="cumulative">累積表值</option>
+                            <option value="state">狀態</option>
+                            <option value="calculated">計算值</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="edit-aggregation">統計方式</label>
+                        <select id="edit-aggregation">
+                            <option value="">尚未設定</option>
+                            <option value="average">平均</option>
+                            <option value="delta">期末減期初</option>
+                            <option value="sum">加總</option>
+                            <option value="max">最大值</option>
+                            <option value="min">最小值</option>
+                            <option value="last">最後值</option>
+                            <option value="duration">運轉時間</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="edit-direction">流向</label>
+                        <select id="edit-direction">
+                            <option value="">尚未設定</option>
+                            <option>輸入</option>
+                            <option>消耗</option>
+                            <option>生產</option>
+                            <option>輸出</option>
+                            <option>回收</option>
+                            <option>排放</option>
+                        </select>
+                    </div>
+                    <div class="span-3">
+                        <label for="edit-notes">備註</label>
+                        <textarea id="edit-notes" placeholder="記錄點位用途、確認狀況或其他補充資訊"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="dialog-actions">
+                <button id="cancel-edit" type="button">取消</button>
+                <button class="primary" type="submit">儲存設定</button>
+            </div>
+        </form>
+    </dialog>
+
+    <div id="toast" class="toast" role="status"></div>
+
+    <script>
+        const initialPoints = [
+            { id: 2, pointName: "FQI_U704A.TOTALIZERA.PV", jsonPath: "FQI_U704A.TOTALIZERA.PV", description: "U_4K", monitor: true, lower: 8200, upper: 12500, category: "壓縮空氣", measurement: "累積流量", unit: "m³", area: "Utility", displayName: "Utility 4K 累積流量 A", equipment: "U-704A", valueType: "cumulative", aggregation: "delta", direction: "消耗", severity: "warning", delay: 5, deadband: 100, notes: "", issue: false },
+            { id: 14, pointName: "FQI_U706A.TOTALIZERA.PV", jsonPath: "FQI_U706A.TOTALIZERA.PV", description: "U_6K", monitor: true, lower: 6000, upper: 11000, category: "壓縮空氣", measurement: "累積流量", unit: "m³", area: "Utility", displayName: "Utility 6K 累積流量 A", equipment: "U-706A", valueType: "cumulative", aggregation: "delta", direction: "消耗", severity: "warning", delay: 5, deadband: 100, notes: "", issue: false },
+            { id: 33, pointName: "FQI_4102.TOTALIZERA.PV", jsonPath: "FQI_4102.TOTALIZERA.PV", description: "N2", monitor: true, lower: "", upper: "", category: "氮氣", measurement: "累積流量", unit: "m³", area: "Utility", displayName: "氮氣總用量", equipment: "N2 System", valueType: "cumulative", aggregation: "delta", direction: "消耗", severity: "warning", delay: 5, deadband: 0, notes: "待確認合理上下限。", issue: false },
+            { id: 34, pointName: "RT_50544.DACA.PV", jsonPath: "RT_50544.DACA.PV", description: "WCS (RT)", monitor: true, lower: 5, upper: 12, category: "冰水", measurement: "溫度", unit: "°C", area: "Utility", displayName: "WCS 回水溫度", equipment: "WCS", valueType: "instantaneous", aggregation: "average", direction: "回收", severity: "warning", delay: 10, deadband: 0.5, notes: "來源存在同名點位，需由 Id 區分。", issue: true },
+            { id: 189, pointName: "RT_50544.DACA.PV", jsonPath: "RT_50544", description: "22KV", monitor: true, lower: "", upper: "", category: "未分類", measurement: "未分類", unit: "", area: "Utility", displayName: "", equipment: "", valueType: "", aggregation: "", direction: "", severity: "warning", delay: 5, deadband: 0, notes: "", issue: true },
+            { id: 213, pointName: "FI_80163RSSP", jsonPath: "FI-80163RSSP", description: "Compressor", monitor: false, lower: "", upper: "", category: "壓縮空氣", measurement: "瞬時流量", unit: "m³/h", area: "SSP", displayName: "SSP Rpet 空壓流量", equipment: "Compressor", valueType: "instantaneous", aggregation: "average", direction: "消耗", severity: "warning", delay: 5, deadband: 0, notes: "JsonPath 與 PointName 格式不同。", issue: true },
+            { id: 297, pointName: "", jsonPath: "504-3-1", description: "Dryer U-D706-A", monitor: true, lower: "", upper: "", category: "未分類", measurement: "運轉狀態", unit: "狀態", area: "Utility", displayName: "乾燥機 U-D706-A", equipment: "U-D706-A", valueType: "state", aggregation: "duration", direction: "", severity: "info", delay: 5, deadband: 0, notes: "PointName 為空白。", issue: true },
+            { id: 299, pointName: "", jsonPath: "", description: "Dryer U-D706-C", monitor: false, lower: "", upper: "", category: "未分類", measurement: "未分類", unit: "", area: "Utility", displayName: "乾燥機 U-D706-C", equipment: "U-D706-C", valueType: "state", aggregation: "duration", direction: "", severity: "info", delay: 5, deadband: 0, notes: "PointName 與 JsonPath 都是空白，暫停監控。", issue: true },
+            { id: 680, pointName: "4Ha_FI_CW01.PV", jsonPath: "4Ha_FI_CW01.PV", description: "4ha | WS | WS-Washing line", monitor: true, lower: 0, upper: 180, category: "用水", measurement: "瞬時流量", unit: "m³/h", area: "4ha", displayName: "4ha 洗滌線用水流量", equipment: "Washing line", valueType: "instantaneous", aggregation: "average", direction: "消耗", severity: "warning", delay: 5, deadband: 5, notes: "", issue: false },
+            { id: 703, pointName: "4Ha_AT_119A.PV", jsonPath: "4Ha_AT_119A.PV", description: "4ha | WWT(4ha) | COD online", monitor: true, lower: 0, upper: 80, category: "環境指標", measurement: "COD", unit: "mg/L", area: "WWT", displayName: "4ha 放流水 COD", equipment: "WWT 4ha", valueType: "instantaneous", aggregation: "average", direction: "排放", severity: "critical", delay: 10, deadband: 5, notes: "", issue: false },
+            { id: 704, pointName: "FT-01A.PV", jsonPath: "FT-01A.PV", description: "WWT(100ha) | Ester waste water", monitor: true, lower: 0, upper: 250, category: "廢水", measurement: "瞬時流量", unit: "m³/h", area: "WWT", displayName: "100ha 酯化廢水流量", equipment: "WWT 100ha", valueType: "instantaneous", aggregation: "average", direction: "排放", severity: "warning", delay: 5, deadband: 5, notes: "", issue: false }
+        ];
+
+        let points = structuredClone(initialPoints);
+        let editingId = null;
+        const selected = new Set();
+        const rows = document.querySelector("#point-rows");
+        const dialog = document.querySelector("#edit-dialog");
+        const filters = ["search", "monitor-filter", "category-filter", "status-filter", "area-filter"];
+
+        const escapeHtml = (value) => String(value ?? "")
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+
+        function isComplete(point) {
+            return point.category !== "未分類" && point.measurement !== "未分類" && point.unit && point.area && point.valueType && point.aggregation;
+        }
+
+        function hasLimit(point) {
+            return point.lower !== "" || point.upper !== "";
+        }
+
+        function statusBadge(point) {
+            if (point.issue) return '<span class="badge danger">來源待確認</span>';
+            if (!isComplete(point)) return '<span class="badge warning">尚未分類</span>';
+            if (!hasLimit(point)) return '<span class="badge info">缺少門檻</span>';
+            return '<span class="badge success">設定完成</span>';
+        }
+
+        function filteredPoints() {
+            const keyword = document.querySelector("#search").value.trim().toLowerCase();
+            const monitor = document.querySelector("#monitor-filter").value;
+            const category = document.querySelector("#category-filter").value;
+            const status = document.querySelector("#status-filter").value;
+            const area = document.querySelector("#area-filter").value;
+            return points.filter((point) => {
+                const haystack = `${point.pointName} ${point.jsonPath} ${point.description}`.toLowerCase();
+                if (keyword && !haystack.includes(keyword)) return false;
+                if (monitor === "on" && !point.monitor) return false;
+                if (monitor === "off" && point.monitor) return false;
+                if (category !== "all" && point.category !== category) return false;
+                if (area !== "all" && point.area !== area) return false;
+                if (status === "complete" && !isComplete(point)) return false;
+                if (status === "incomplete" && isComplete(point)) return false;
+                if (status === "issue" && !point.issue) return false;
+                if (status === "no-limit" && hasLimit(point)) return false;
+                return true;
+            });
+        }
+
+        function render() {
+            const visible = filteredPoints();
+            rows.innerHTML = visible.map((point) => `
+                <tr class="${selected.has(point.id) ? "selected" : ""} ${point.issue ? "issue-row" : ""}" data-id="${point.id}">
+                    <td class="check-cell"><input class="row-check" type="checkbox" ${selected.has(point.id) ? "checked" : ""} aria-label="選取點位 ${point.id}"></td>
+                    <td class="id-cell">${point.id}</td>
+                    <td class="point-cell">${point.pointName ? escapeHtml(point.pointName) : '<span class="empty-value">（空白）</span>'}</td>
+                    <td class="point-cell">${point.jsonPath ? escapeHtml(point.jsonPath) : '<span class="empty-value">（空白）</span>'}</td>
+                    <td class="description-cell"><div class="ellipsis" title="${escapeHtml(point.description)}">${escapeHtml(point.description)}</div></td>
+                    <td>
+                        <label class="switch" title="是否監控">
+                            <input class="monitor-toggle" type="checkbox" ${point.monitor ? "checked" : ""}>
+                            <span></span>
+                        </label>
+                    </td>
+                    <td class="limit-cell"><input class="quick-lower" type="number" step="any" value="${escapeHtml(point.lower)}" placeholder="未設定" aria-label="下限"></td>
+                    <td class="limit-cell"><input class="quick-upper" type="number" step="any" value="${escapeHtml(point.upper)}" placeholder="未設定" aria-label="上限"></td>
+                    <td>${escapeHtml(point.category)}</td>
+                    <td>${escapeHtml(point.measurement)}</td>
+                    <td>${escapeHtml(point.unit || "—")}</td>
+                    <td>${escapeHtml(point.area || "—")}</td>
+                    <td>${statusBadge(point)}</td>
+                    <td class="action-cell"><button class="small edit-button" type="button">編輯</button></td>
+                </tr>
+            `).join("");
+            document.querySelector("#selected-count").textContent = selected.size;
+            document.querySelector("#result-summary").textContent = visible.length === points.length
+                ? `顯示 ${visible.length} 筆 Demo 資料，共 388 個公用點位`
+                : `篩選結果 ${visible.length} 筆（Demo 樣本共 ${points.length} 筆）`;
+            document.querySelector("#select-all").checked = visible.length > 0 && visible.every((point) => selected.has(point.id));
+        }
+
+        function showToast(message) {
+            const toast = document.querySelector("#toast");
+            toast.textContent = message;
+            toast.style.display = "block";
+            clearTimeout(showToast.timer);
+            showToast.timer = setTimeout(() => { toast.style.display = "none"; }, 2600);
+        }
+
+        function pointFromRow(element) {
+            const id = Number(element.closest("tr").dataset.id);
+            return points.find((point) => point.id === id);
+        }
+
+        rows.addEventListener("change", (event) => {
+            const point = pointFromRow(event.target);
+            if (!point) return;
+            if (event.target.classList.contains("row-check")) {
+                event.target.checked ? selected.add(point.id) : selected.delete(point.id);
+                render();
+            }
+            if (event.target.classList.contains("monitor-toggle")) {
+                point.monitor = event.target.checked;
+                showToast(`點位 ${point.id} 已${point.monitor ? "啟用" : "停止"}監控（Demo）`);
+            }
+            if (event.target.classList.contains("quick-lower")) point.lower = event.target.value;
+            if (event.target.classList.contains("quick-upper")) point.upper = event.target.value;
+        });
+
+        rows.addEventListener("click", (event) => {
+            if (!event.target.classList.contains("edit-button")) return;
+            openEditor(pointFromRow(event.target));
+        });
+
+        document.querySelector("#select-all").addEventListener("change", (event) => {
+            filteredPoints().forEach((point) => event.target.checked ? selected.add(point.id) : selected.delete(point.id));
+            render();
+        });
+
+        filters.forEach((id) => document.querySelector(`#${id}`).addEventListener(id === "search" ? "input" : "change", render));
+        document.querySelector("#clear-filter").addEventListener("click", () => {
+            document.querySelector("#search").value = "";
+            ["monitor-filter", "category-filter", "status-filter", "area-filter"].forEach((id) => document.querySelector(`#${id}`).value = "all");
+            render();
+        });
+
+        function applyToSelected(callback, message) {
+            if (!selected.size) return showToast("請先勾選至少一個點位。");
+            points.filter((point) => selected.has(point.id)).forEach(callback);
+            render();
+            showToast(message);
+        }
+
+        document.querySelector("#bulk-apply").addEventListener("click", () => {
+            const category = document.querySelector("#bulk-category").value;
+            if (!category) return showToast("請先選擇要套用的能源類別。");
+            applyToSelected((point) => { point.category = category; }, `已批次更新 ${selected.size} 個點位類別（Demo）`);
+        });
+        document.querySelector("#bulk-monitor-on").addEventListener("click", () => applyToSelected((point) => { point.monitor = true; }, `已啟用 ${selected.size} 個點位（Demo）`));
+        document.querySelector("#bulk-monitor-off").addEventListener("click", () => applyToSelected((point) => { point.monitor = false; }, `已停止 ${selected.size} 個點位（Demo）`));
+        document.querySelector("#export-demo").addEventListener("click", () => showToast("正式版會在這裡下載目前篩選結果的 Excel。"));
+
+        function setValue(id, value) { document.querySelector(`#${id}`).value = value ?? ""; }
+
+        function openEditor(point) {
+            editingId = point.id;
+            document.querySelector("#view-id").textContent = point.id;
+            document.querySelector("#view-point-name").textContent = point.pointName || "（空白）";
+            document.querySelector("#view-json-path").textContent = point.jsonPath || "（空白）";
+            document.querySelector("#view-description").textContent = point.description || "（空白）";
+            document.querySelector("#edit-monitor").checked = point.monitor;
+            document.querySelector("#monitor-label").textContent = point.monitor ? "監控中" : "不監控";
+            setValue("edit-lower", point.lower);
+            setValue("edit-upper", point.upper);
+            setValue("edit-severity", point.severity);
+            setValue("edit-value-mode", point.valueMode || (point.valueType === "cumulative" ? "interval_delta" : "raw"));
+            setValue("edit-consecutive", point.consecutive || 1);
+            setValue("edit-deadband", point.deadband);
+            setValue("edit-display-name", point.displayName);
+            setValue("edit-category", point.category);
+            setValue("edit-measurement", point.measurement);
+            setValue("edit-unit", point.unit);
+            setValue("edit-area", point.area);
+            setValue("edit-equipment", point.equipment);
+            setValue("edit-value-type", point.valueType);
+            setValue("edit-aggregation", point.aggregation);
+            setValue("edit-direction", point.direction);
+            setValue("edit-notes", point.notes);
+            document.querySelector("#validation-message").style.display = "none";
+            dialog.showModal();
+        }
+
+        document.querySelector("#edit-monitor").addEventListener("change", (event) => {
+            document.querySelector("#monitor-label").textContent = event.target.checked ? "監控中" : "不監控";
+        });
+        document.querySelector("#close-dialog").addEventListener("click", () => dialog.close());
+        document.querySelector("#cancel-edit").addEventListener("click", () => dialog.close());
+        dialog.addEventListener("click", (event) => {
+            if (event.target === dialog) dialog.close();
+        });
+
+        document.querySelector("#edit-form").addEventListener("submit", (event) => {
+            event.preventDefault();
+            const lowerRaw = document.querySelector("#edit-lower").value;
+            const upperRaw = document.querySelector("#edit-upper").value;
+            const validation = document.querySelector("#validation-message");
+            if (lowerRaw !== "" && upperRaw !== "" && Number(lowerRaw) > Number(upperRaw)) {
+                validation.textContent = "下限不可大於上限，請修正後再儲存。";
+                validation.style.display = "block";
+                return;
+            }
+            const point = points.find((item) => item.id === editingId);
+            point.monitor = document.querySelector("#edit-monitor").checked;
+            point.lower = lowerRaw;
+            point.upper = upperRaw;
+            point.severity = document.querySelector("#edit-severity").value;
+            point.valueMode = document.querySelector("#edit-value-mode").value;
+            point.consecutive = document.querySelector("#edit-consecutive").value;
+            point.deadband = document.querySelector("#edit-deadband").value;
+            point.displayName = document.querySelector("#edit-display-name").value.trim();
+            point.category = document.querySelector("#edit-category").value;
+            point.measurement = document.querySelector("#edit-measurement").value;
+            point.unit = document.querySelector("#edit-unit").value;
+            point.area = document.querySelector("#edit-area").value;
+            point.equipment = document.querySelector("#edit-equipment").value.trim();
+            point.valueType = document.querySelector("#edit-value-type").value;
+            point.aggregation = document.querySelector("#edit-aggregation").value;
+            point.direction = document.querySelector("#edit-direction").value;
+            point.notes = document.querySelector("#edit-notes").value.trim();
+            dialog.close();
+            render();
+            showToast(`點位 ${point.id} 的設定已儲存（Demo）`);
+        });
+
+        document.querySelector("#reset-demo").addEventListener("click", () => {
+            points = structuredClone(initialPoints);
+            selected.clear();
+            render();
+            showToast("Demo 資料已還原。");
+        });
+
+        render();
+    </script>
+</body>
+</html>

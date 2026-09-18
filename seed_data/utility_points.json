@@ -1,0 +1,3892 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-18T07:47:52.013371+00:00",
+  "source": {
+    "external_id": 1,
+    "name": "UtilityDepartment",
+    "api_url": null,
+    "source_is_active": true
+  },
+  "points": [
+    {
+      "external_id": 2,
+      "data_source_id": 1,
+      "point_name": "FQI_U704A.TOTALIZERA.PV",
+      "json_path": "FQI_U704A.TOTALIZERA.PV",
+      "description": "U_4K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 4,
+      "data_source_id": 1,
+      "point_name": "FQI_U704B.TOTALIZERA.PV",
+      "json_path": "FQI_U704B.TOTALIZERA.PV",
+      "description": "U_4K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 5,
+      "data_source_id": 1,
+      "point_name": "FQI_U704C.TOTALIZERA.PV",
+      "json_path": "FQI_U704C.TOTALIZERA.PV",
+      "description": "U_4K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 6,
+      "data_source_id": 1,
+      "point_name": "FQI_U704D.TOTALIZERA.PV",
+      "json_path": "FQI_U704D.TOTALIZERA.PV",
+      "description": "U_4K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 11,
+      "data_source_id": 1,
+      "point_name": "FQI_U704E.TOTALIZERA.PV",
+      "json_path": "FQI_U704E.TOTALIZERA.PV",
+      "description": "U_4K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 12,
+      "data_source_id": 1,
+      "point_name": "DPI_50135.DACA.PV",
+      "json_path": "DPI_50135.DACA.PV",
+      "description": "U_4K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 13,
+      "data_source_id": 1,
+      "point_name": "PI_50135.DACA.PV",
+      "json_path": "PI_50135.DACA.PV",
+      "description": "U_4K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 14,
+      "data_source_id": 1,
+      "point_name": "FQI_U706A.TOTALIZERA.PV",
+      "json_path": "FQI_U706A.TOTALIZERA.PV",
+      "description": "U_6K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 16,
+      "data_source_id": 1,
+      "point_name": "FQI_U706B.TOTALIZERA.PV",
+      "json_path": "FQI_U706B.TOTALIZERA.PV",
+      "description": "U_6K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 17,
+      "data_source_id": 1,
+      "point_name": "FQI_U706C.TOTALIZERA.PV",
+      "json_path": "FQI_U706C.TOTALIZERA.PV",
+      "description": "U_6K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 26,
+      "data_source_id": 1,
+      "point_name": "FQI_36205.TOTALIZERA.PV",
+      "json_path": "FQI_36205.TOTALIZERA.PV",
+      "description": "Ｕ_6K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 27,
+      "data_source_id": 1,
+      "point_name": "FI_36206.PV",
+      "json_path": "FQI_36206.TOTALIZERA.PV",
+      "description": "U_6K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 28,
+      "data_source_id": 1,
+      "point_name": "DPI_50237.DACA.PV",
+      "json_path": "DPI_50237.DACA.PV",
+      "description": "U_6K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 29,
+      "data_source_id": 1,
+      "point_name": "DPI_50238.DACA.PV",
+      "json_path": "DPI_50238.DACA.PV",
+      "description": "U_6K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 30,
+      "data_source_id": 1,
+      "point_name": "DPI_50260.DACA.PV",
+      "json_path": "DPI_50260.DACA.PV",
+      "description": "U_6K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 31,
+      "data_source_id": 1,
+      "point_name": "PI_50207.DACA.PV",
+      "json_path": "PI_50207.DACA.PV",
+      "description": "U_6K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 32,
+      "data_source_id": 1,
+      "point_name": "PI_50208.DACA.PV",
+      "json_path": "PI_50208.DACA.PV",
+      "description": "U_6K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 33,
+      "data_source_id": 1,
+      "point_name": "FQI_4102.TOTALIZERA.PV",
+      "json_path": "FQI_4102.TOTALIZERA.PV",
+      "description": "N2",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 34,
+      "data_source_id": 1,
+      "point_name": "RT_50544.DACA.PV",
+      "json_path": "RT_50544.DACA.PV",
+      "description": "WCS (RT)",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 35,
+      "data_source_id": 1,
+      "point_name": "RT_50541.DACA.PV",
+      "json_path": "RT_50541.DACA.PV",
+      "description": "WCS (RT)",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 36,
+      "data_source_id": 1,
+      "point_name": "RT_50540.DACA.PV",
+      "json_path": "RT_50540.DACA.PV",
+      "description": "WCS (RT)",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 37,
+      "data_source_id": 1,
+      "point_name": "TI_50516.DACA.PV",
+      "json_path": "TI_50516.DACA.PV",
+      "description": "WCS (RT)",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 38,
+      "data_source_id": 1,
+      "point_name": "TI_50515.DACA.PV",
+      "json_path": "TI_50515.DACA.PV",
+      "description": "WCS (RT)",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 39,
+      "data_source_id": 1,
+      "point_name": "PIC_50502.PIDA.PV",
+      "json_path": "PIC_50502.PIDA.PV",
+      "description": "WCS (RT)",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 40,
+      "data_source_id": 1,
+      "point_name": "PI_50501.DACA.PV",
+      "json_path": "PI_50501.DACA.PV",
+      "description": "WCS (RT)",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 41,
+      "data_source_id": 1,
+      "point_name": "FI_50445.DACA.PV",
+      "json_path": "FQI_50445.TOTALIZERA.PV",
+      "description": "U_WS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 42,
+      "data_source_id": 1,
+      "point_name": "TI_50402.DACA.PV",
+      "json_path": "TI_50402.DACA.PV",
+      "description": "U_WS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 43,
+      "data_source_id": 1,
+      "point_name": "PIC_50411.PIDA.PV",
+      "json_path": "PIC_50411.PIDA.PV",
+      "description": "U_WS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 44,
+      "data_source_id": 1,
+      "point_name": "FQI_35101.TOTALIZERA.PV",
+      "json_path": "FQI_35101.TOTALIZERA.PV",
+      "description": "U_4K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 45,
+      "data_source_id": 1,
+      "point_name": "FQI_36201.TOTALIZERA.PV",
+      "json_path": "FQI_36201.TOTALIZERA.PV",
+      "description": "CP_AI",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 46,
+      "data_source_id": 1,
+      "point_name": "FQI_35401.TOTALIZERA.PV",
+      "json_path": "FQI_35401.TOTALIZERA.PV",
+      "description": "CP_N2",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 47,
+      "data_source_id": 1,
+      "point_name": "RT_50543.DACA.PV",
+      "json_path": "RT_50543.DACA.PV",
+      "description": "CP_WCS (RT)",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 48,
+      "data_source_id": 1,
+      "point_name": "RT_50542.DACA.PV",
+      "json_path": "RT_50542.DACA.PV",
+      "description": "CP_WCS (RT)",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 49,
+      "data_source_id": 1,
+      "point_name": "FI_15601.DACA.PV",
+      "json_path": "FI_15601.DACA.PV",
+      "description": "CP_WC",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 50,
+      "data_source_id": 1,
+      "point_name": "FQI_15623.TOTALIZERA.PV",
+      "json_path": "FQI_15623.TOTALIZERA.PV",
+      "description": "CP_WC",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 51,
+      "data_source_id": 1,
+      "point_name": "TI_35647.DACA.PV",
+      "json_path": "TI_35647.DACA.PV",
+      "description": "CP_WC",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 52,
+      "data_source_id": 1,
+      "point_name": "PI_35607.DACA.PV",
+      "json_path": "PI_35607.DACA.PV",
+      "description": "CP_WC",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 53,
+      "data_source_id": 1,
+      "point_name": "FI_36502.DACA.PV",
+      "json_path": "FI_36502.DACA.PV",
+      "description": "CP_SI",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 54,
+      "data_source_id": 1,
+      "point_name": "FQI_35106.TOTALIZERA.PV",
+      "json_path": "FQI_35106.TOTALIZERA.PV",
+      "description": "BOILER_6K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 55,
+      "data_source_id": 1,
+      "point_name": "FQI_36203.TOTALIZERA.PV",
+      "json_path": "FQI_36203.TOTALIZERA.PV",
+      "description": "BOILER_AI",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 56,
+      "data_source_id": 1,
+      "point_name": "FQI_35403.TOTALIZERA.PV",
+      "json_path": "FQI_35403.TOTALIZERA.PV",
+      "description": "BOILER_N2",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 57,
+      "data_source_id": 1,
+      "point_name": "FQI_36508.TOTALIZERA.PV",
+      "json_path": "FQI_36508.TOTALIZERA.PV",
+      "description": "BOILER_SI",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 58,
+      "data_source_id": 1,
+      "point_name": "RT_36122.DACA.PV",
+      "json_path": "RT_36122.DACA.PV",
+      "description": "BOILER_WCS(RT)",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 59,
+      "data_source_id": 1,
+      "point_name": "FQI_35127.TOTALIZERA.PV",
+      "json_path": "FQI_35127.TOTALIZERA.PV",
+      "description": "SSP_4K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 60,
+      "data_source_id": 1,
+      "point_name": "FQI35126.TOTALIZERA.PV",
+      "json_path": "FQI35126.TOTALIZERA.PV",
+      "description": "SSP_4K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 61,
+      "data_source_id": 1,
+      "point_name": "FQI_35103.TOTALIZERA.PV",
+      "json_path": "FQI_35103.TOTALIZERA.PV",
+      "description": "SSP_4K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 62,
+      "data_source_id": 1,
+      "point_name": "FQI_35105.TOTALIZERA.PV",
+      "json_path": "FQI_35105.TOTALIZERA.PV",
+      "description": "SSP_6K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 63,
+      "data_source_id": 1,
+      "point_name": "FQI_8602.TOTALIZERA.PV",
+      "json_path": "FQI_8602.TOTALIZERA.PV",
+      "description": "SSP_AI",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 64,
+      "data_source_id": 1,
+      "point_name": "FQI_8201.TOTALIZERA.PV",
+      "json_path": "FQI_8201.TOTALIZERA.PV",
+      "description": "SSP_N2",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 65,
+      "data_source_id": 1,
+      "point_name": "RT_8401.DACA.PV",
+      "json_path": "RT_8401.DACA.PV",
+      "description": "SSP_WCS(RT)",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 66,
+      "data_source_id": 1,
+      "point_name": "FQI_8301.TOTALIZERA.PV",
+      "json_path": "FQI_8301.TOTALIZERA.PV",
+      "description": "SSP_WS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 67,
+      "data_source_id": 1,
+      "point_name": "FQI_80163RSSP.TOTALIZERA.PV",
+      "json_path": "FQI_80163RSSP.TOTALIZERA.PV",
+      "description": "SSPREPT_4K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 68,
+      "data_source_id": 1,
+      "point_name": "RSD060A0045.PV",
+      "json_path": "RSD060A0045.PV",
+      "description": "SSPREPT_4K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 69,
+      "data_source_id": 1,
+      "point_name": "RSD060B0045.PV",
+      "json_path": "RSD060B0045.PV",
+      "description": "SSPREPT_4K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 70,
+      "data_source_id": 1,
+      "point_name": "RSSP02_PT_8502.PV",
+      "json_path": "RSSP02_PT_8502.PV",
+      "description": "SSPREPT_4K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 71,
+      "data_source_id": 1,
+      "point_name": "RT_8401RSSP.DACA.PV",
+      "json_path": "RT_8401RSSP.DACA.PV",
+      "description": "SSP Rpet_WCS(RT)",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 72,
+      "data_source_id": 1,
+      "point_name": "FQI_8301RSSP.TOTALIZERA.PV",
+      "json_path": "FQI_8301RSSP.TOTALIZERA.PV",
+      "description": "SSP Rpet_WS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 73,
+      "data_source_id": 1,
+      "point_name": "RSSP02_FT_9101.PV",
+      "json_path": "RSSP02_FT_9101.PV",
+      "description": "SSP Rpet_SA",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 74,
+      "data_source_id": 1,
+      "point_name": "FQI_1719.TOTALIZERA.PV",
+      "json_path": "FQI_1719.TOTALIZERA.PV",
+      "description": "CP2_4K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 75,
+      "data_source_id": 1,
+      "point_name": "FQI_3117.TOTALIZERA.PV",
+      "json_path": "FQI_3117.TOTALIZERA.PV",
+      "description": "CP2_6K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 76,
+      "data_source_id": 1,
+      "point_name": "FQI_3114.TOTALIZERA.PV",
+      "json_path": "FQI_3114.TOTALIZERA.PV",
+      "description": "CP2_AI",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 77,
+      "data_source_id": 1,
+      "point_name": "FQI_3205.TOTALIZERA.PV",
+      "json_path": "FQI_3205.TOTALIZERA.PV",
+      "description": "CP2_N2",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 78,
+      "data_source_id": 1,
+      "point_name": "FQI_3301.TOTALIZERA.PV",
+      "json_path": "FQI_3301.TOTALIZERA.PV",
+      "description": "CP2_SI",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 79,
+      "data_source_id": 1,
+      "point_name": "RT_3001.DACA.PV",
+      "json_path": "RT_3001.DACA.PV",
+      "description": "CP2_WCS(RT)",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 80,
+      "data_source_id": 1,
+      "point_name": "FQI_3007.TOTALIZERA.PV",
+      "json_path": "FQI_3007.TOTALIZERA.PV",
+      "description": "CP2_WS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 81,
+      "data_source_id": 1,
+      "point_name": "FQI_3101.TOTALIZERA.PV",
+      "json_path": "FQI_3101.TOTALIZERA.PV",
+      "description": "CP2_SA",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 82,
+      "data_source_id": 1,
+      "point_name": "FQI_35106.TOTALIZERA.PV",
+      "json_path": "FQI_35106.TOTALIZERA.PV",
+      "description": "PSF_6K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 83,
+      "data_source_id": 1,
+      "point_name": "FQI_15101.TOTALIZERA.PV",
+      "json_path": "FQI_15101.TOTALIZERA.PV",
+      "description": "PSF_AI",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 84,
+      "data_source_id": 1,
+      "point_name": "FQI_15131.TOTALIZERA.PV",
+      "json_path": "FQI_15131.TOTALIZERA.PV",
+      "description": "PSF_SI",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 85,
+      "data_source_id": 1,
+      "point_name": "FQI_50641.TOTALIZERA.PV",
+      "json_path": "FQI_50641.TOTALIZERA.PV",
+      "description": "PSF_WS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 86,
+      "data_source_id": 1,
+      "point_name": "FQI_50619.TOTALIZERA.PV",
+      "json_path": "FQI_50619.TOTALIZERA.PV",
+      "description": "PSF_WS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 87,
+      "data_source_id": 1,
+      "point_name": "TIC50625.PIDA.PV",
+      "json_path": "TIC50625.PIDA.PV",
+      "description": "PSF_WS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 88,
+      "data_source_id": 1,
+      "point_name": "PIC50624.PIDA.PV",
+      "json_path": "PIC50624.PIDA.PV",
+      "description": "PSF_WS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 89,
+      "data_source_id": 1,
+      "point_name": "RT_50746.DACA.PV",
+      "json_path": "RT_50746.DACA.PV",
+      "description": "PSF_WCS(RT)",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 90,
+      "data_source_id": 1,
+      "point_name": "RT_50747.DACA.PV",
+      "json_path": "RT_50747.DACA.PV",
+      "description": "PSF_WCS(RT)",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 91,
+      "data_source_id": 1,
+      "point_name": "RT_50748.DACA.PV",
+      "json_path": "RT_50748.DACA.PV",
+      "description": "PSF_WCS(RT)",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 92,
+      "data_source_id": 1,
+      "point_name": "TI50701.DACA.PV",
+      "json_path": "TI50701.DACA.PV",
+      "description": "PSF_WCS(RT)",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 93,
+      "data_source_id": 1,
+      "point_name": "TI50703.DACA.PV",
+      "json_path": "TI50703.DACA.PV",
+      "description": "PSF_WCS(RT)",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 94,
+      "data_source_id": 1,
+      "point_name": "PIC50704.PIDA.PV",
+      "json_path": "PIC50704.PIDA.PV",
+      "description": "PSF_WCS(RT)",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 95,
+      "data_source_id": 1,
+      "point_name": "PI50702.DACA.PV",
+      "json_path": "PI50702.DACA.PV",
+      "description": "PSF_WCS(RT)",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 96,
+      "data_source_id": 1,
+      "point_name": "RT_50715.DACA.PV",
+      "json_path": "RT_50715.DACA.PV",
+      "description": "PSF_WCS(RT)",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 97,
+      "data_source_id": 1,
+      "point_name": "FQI5111.TOTALIZERA.PV",
+      "json_path": "FQI5111.TOTALIZERA.PV",
+      "description": "PSF_SA",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 138,
+      "data_source_id": 1,
+      "point_name": "FI_U704A.DACA.PV",
+      "json_path": "FI_U704A.DACA.PV",
+      "description": "U_4K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 139,
+      "data_source_id": 1,
+      "point_name": "FI_U704B.DACA.PV",
+      "json_path": "FI_U704B.DACA.PV",
+      "description": "U_4K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 140,
+      "data_source_id": 1,
+      "point_name": "FI_U704C.DACA.PV",
+      "json_path": "FI_U704C.DACA.PV",
+      "description": "U_4K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 141,
+      "data_source_id": 1,
+      "point_name": "FI_U704D.DACA.PV",
+      "json_path": "FI_U704D.DACA.PV",
+      "description": "U_4K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 142,
+      "data_source_id": 1,
+      "point_name": "FI_U704E.DACA.PV",
+      "json_path": "FI_U704E.DACA.PV",
+      "description": "U_4K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 183,
+      "data_source_id": 1,
+      "point_name": "FI_U706A.DACA.PV",
+      "json_path": "FI_U706A",
+      "description": "U-G706-A",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 184,
+      "data_source_id": 1,
+      "point_name": "FI_U706B.DACA.PV",
+      "json_path": "FI_U706B",
+      "description": "U-G706-B",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 185,
+      "data_source_id": 1,
+      "point_name": "FI_U706C.DACA.PV",
+      "json_path": "FI_U706C",
+      "description": "U-G706-C",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 186,
+      "data_source_id": 1,
+      "point_name": "FI_36205.DACA.PV",
+      "json_path": "FI_36205",
+      "description": "N2_AI",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 187,
+      "data_source_id": 1,
+      "point_name": "FI_36206.DACA.PV",
+      "json_path": "FI_36206",
+      "description": "WWT",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 188,
+      "data_source_id": 1,
+      "point_name": "FI_4102.DACA.PV",
+      "json_path": "FI_4102",
+      "description": "N2",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 189,
+      "data_source_id": 1,
+      "point_name": "RT_50544.DACA.PV",
+      "json_path": "RT_50544",
+      "description": "22KV",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 190,
+      "data_source_id": 1,
+      "point_name": "RT_50541.DACA.PV",
+      "json_path": "RT_50541",
+      "description": "Utility",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 191,
+      "data_source_id": 1,
+      "point_name": "RT_50540.DACA.PV",
+      "json_path": "RT_50540",
+      "description": "WWT",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 192,
+      "data_source_id": 1,
+      "point_name": "FI_35101.DACA.PV",
+      "json_path": "FI_35101",
+      "description": "US_US",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 193,
+      "data_source_id": 1,
+      "point_name": "FI_35103.DACA.PV",
+      "json_path": "FI_35103",
+      "description": "CP ACU",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 194,
+      "data_source_id": 1,
+      "point_name": "FI_36201.DACA.PV",
+      "json_path": "FI_36201",
+      "description": "US_US",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 195,
+      "data_source_id": 1,
+      "point_name": "FI_35401.DACA.PV",
+      "json_path": "FI_35401",
+      "description": "CP ACU",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 196,
+      "data_source_id": 1,
+      "point_name": "RT_50543.DACA.PV",
+      "json_path": "RT_50543",
+      "description": "CP-OSC",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 197,
+      "data_source_id": 1,
+      "point_name": "RT_50542.DACA.PV",
+      "json_path": "RT_50542",
+      "description": "CP 14\"",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 198,
+      "data_source_id": 1,
+      "point_name": "FI_35601.DACA.PV",
+      "json_path": "FI_35601",
+      "description": "US_CP",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 199,
+      "data_source_id": 1,
+      "point_name": "FI15623.DACA.PV",
+      "json_path": "FI15623.DACA.PV",
+      "description": "CP_TOTAL",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 200,
+      "data_source_id": 1,
+      "point_name": "FI_35106.DACA.PV",
+      "json_path": "FI_35106",
+      "description": "CP_TOTAL",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 201,
+      "data_source_id": 1,
+      "point_name": "FI_36203.DACA.PV",
+      "json_path": "FI_36203",
+      "description": "CP_TOTAL",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 202,
+      "data_source_id": 1,
+      "point_name": "FI_35403.DACA.PV",
+      "json_path": "FI_35403",
+      "description": "CP_TOTAL",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 203,
+      "data_source_id": 1,
+      "point_name": "FI_36508.DACA.PV",
+      "json_path": "FI_36508",
+      "description": "CP_TOTAL",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 204,
+      "data_source_id": 1,
+      "point_name": "RT_36122.DACA.PV",
+      "json_path": "RT_36122",
+      "description": "CP_TOTAL",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 205,
+      "data_source_id": 1,
+      "point_name": "FI_35127.DACA.PV",
+      "json_path": "FI-35127",
+      "description": "SSP 4.5",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 206,
+      "data_source_id": 1,
+      "point_name": "FI_35126.DACA.PV",
+      "json_path": "FI-35126",
+      "description": "Seabulk",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 207,
+      "data_source_id": 1,
+      "point_name": "FI35103.DACA.PV",
+      "json_path": "FI-35103",
+      "description": "SSP 6.7",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 208,
+      "data_source_id": 1,
+      "point_name": "FI35105.DACA.PV",
+      "json_path": "FI-35105",
+      "description": "",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 209,
+      "data_source_id": 1,
+      "point_name": "FI_8602.DACA.PV",
+      "json_path": "FI_8602.DACA.PV",
+      "description": "",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 210,
+      "data_source_id": 1,
+      "point_name": "FI8201.DACA.PV",
+      "json_path": "FI-8201",
+      "description": "",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 211,
+      "data_source_id": 1,
+      "point_name": "RT_8401.DACA.PV",
+      "json_path": "RT-8401",
+      "description": "",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 212,
+      "data_source_id": 1,
+      "point_name": "FI_8301.DACA.PV",
+      "json_path": "FI-8301",
+      "description": "CP_SSP",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 213,
+      "data_source_id": 1,
+      "point_name": "FI_80163RSSP",
+      "json_path": "FI-80163RSSP",
+      "description": "Compressor",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 214,
+      "data_source_id": 1,
+      "point_name": "FI_8201.DACA.PV",
+      "json_path": "FI-8201RSSP",
+      "description": "",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 215,
+      "data_source_id": 1,
+      "point_name": "RSSP01_FT_8501.PV",
+      "json_path": "FI-8501RSSP",
+      "description": "SSP-Rpet_SSP-Rpet",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 216,
+      "data_source_id": 1,
+      "point_name": "RSSP02_FT_8502.PV",
+      "json_path": "RSSP02_FT_8502.PV",
+      "description": "SSP-Rpet_Seabulk",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 217,
+      "data_source_id": 1,
+      "point_name": "RSSP01_FT_8601.PV",
+      "json_path": "FI-8601RSSP",
+      "description": "",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 218,
+      "data_source_id": 1,
+      "point_name": "RSSP01_FT_8201.PV",
+      "json_path": "FI-8201TNRSSP",
+      "description": "",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 219,
+      "data_source_id": 1,
+      "point_name": "RT_8401RSSP.DACA.PV",
+      "json_path": "RT-8401RSSP",
+      "description": "",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 220,
+      "data_source_id": 1,
+      "point_name": "RSSP01_FT_8301.PV",
+      "json_path": "FI-8301RSSP",
+      "description": "US_SSP Rpet",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 221,
+      "data_source_id": 1,
+      "point_name": "RSSP02_FT_91101.PV",
+      "json_path": "FI-91101RSSP",
+      "description": "",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 222,
+      "data_source_id": 1,
+      "point_name": "FI1719.DACA.PV",
+      "json_path": "FI1719.DACA.PV",
+      "description": "",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 223,
+      "data_source_id": 1,
+      "point_name": "FI3117.DACA.PV",
+      "json_path": "FI-3117",
+      "description": "",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 224,
+      "data_source_id": 1,
+      "point_name": "FI3114.DACA.PV",
+      "json_path": "FI-3114",
+      "description": "",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 225,
+      "data_source_id": 1,
+      "point_name": "FI3205.DACA.PV",
+      "json_path": "FI-3205",
+      "description": "",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 226,
+      "data_source_id": 1,
+      "point_name": "FI3301.DACA.PV",
+      "json_path": "FI-3301",
+      "description": "",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 227,
+      "data_source_id": 1,
+      "point_name": "RT_3001.DACA.PV",
+      "json_path": "RT-3001",
+      "description": "PSF_CP2",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 228,
+      "data_source_id": 1,
+      "point_name": "FI3007.DACA.PV",
+      "json_path": "FI-3007",
+      "description": "PSF_CP2",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 229,
+      "data_source_id": 1,
+      "point_name": "FI3101.DACA.PV",
+      "json_path": "FI-3101",
+      "description": "",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 230,
+      "data_source_id": 1,
+      "point_name": "FI5106.DACA.PV",
+      "json_path": "FI-5106",
+      "description": "",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 231,
+      "data_source_id": 1,
+      "point_name": "FI5131.DACA.PV",
+      "json_path": "FI-5131",
+      "description": "PSF_PSF",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 232,
+      "data_source_id": 1,
+      "point_name": "FI50641.DACA.PV",
+      "json_path": "FI-50641",
+      "description": "PSF_CP2+chiller",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 233,
+      "data_source_id": 1,
+      "point_name": "FI50619.DACA.PV",
+      "json_path": "FI-50619",
+      "description": "",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 234,
+      "data_source_id": 1,
+      "point_name": "TIC50625.PIDA.PV",
+      "json_path": "TIC-50625",
+      "description": "Temperature_WS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 235,
+      "data_source_id": 1,
+      "point_name": "PIC50624.PIDA.PV",
+      "json_path": "PIC-50624",
+      "description": "pressure_WS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 236,
+      "data_source_id": 1,
+      "point_name": "RT_50746.DACA.PV",
+      "json_path": "RT-50746",
+      "description": "S-G610-A",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 237,
+      "data_source_id": 1,
+      "point_name": "RT_50747.DACA.PV",
+      "json_path": "RT-50747",
+      "description": "S-G610-B",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 238,
+      "data_source_id": 1,
+      "point_name": "RT_50748.DACA.PV",
+      "json_path": "RT-50748",
+      "description": "S-G610-C",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 239,
+      "data_source_id": 1,
+      "point_name": "FI5111.DACA.PV",
+      "json_path": "FI-5111",
+      "description": "",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 240,
+      "data_source_id": 1,
+      "point_name": "POY1_FI70481.PV",
+      "json_path": "FI-70481",
+      "description": "F-A120-A",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 241,
+      "data_source_id": 1,
+      "point_name": "POY1_FI70482.PV",
+      "json_path": "FI-70482",
+      "description": "F-A120-B",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 242,
+      "data_source_id": 1,
+      "point_name": "POY1_FI70486.PV",
+      "json_path": "FI-70486",
+      "description": "12K TANK",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 243,
+      "data_source_id": 1,
+      "point_name": "POY1_FI70381.PV",
+      "json_path": "FI-70381",
+      "description": "F-A080-A",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 244,
+      "data_source_id": 1,
+      "point_name": "POY1_FI70382.PV",
+      "json_path": "FI-70382",
+      "description": "F-A080-B",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 245,
+      "data_source_id": 1,
+      "point_name": "POY1_FI70383.PV",
+      "json_path": "FI-70383",
+      "description": "F-A080-C",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 246,
+      "data_source_id": 1,
+      "point_name": "POY1_FI70286.PV",
+      "json_path": "FI-70286",
+      "description": "8K_AP TANK",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 247,
+      "data_source_id": 1,
+      "point_name": "POY1_FI70386.PV",
+      "json_path": "FI-70386",
+      "description": "8K_AI TANK",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 248,
+      "data_source_id": 1,
+      "point_name": "POY1_FI70283.PV",
+      "json_path": "FI-70283",
+      "description": "8K_6K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 249,
+      "data_source_id": 1,
+      "point_name": "POY1_FI70281.PV",
+      "json_path": "FI-70281",
+      "description": "F-A060-A",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 250,
+      "data_source_id": 1,
+      "point_name": "POY1_FI70282.PV",
+      "json_path": "FI-70282",
+      "description": "F-A060-B",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 251,
+      "data_source_id": 1,
+      "point_name": "POY1_FI70287.PV",
+      "json_path": "FI-70287",
+      "description": "6K_AP TANK",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 252,
+      "data_source_id": 1,
+      "point_name": "POY1_FI70387.PV",
+      "json_path": "FI-70387",
+      "description": "6K_AI TANK",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 253,
+      "data_source_id": 1,
+      "point_name": "POY1_FI70183.PV",
+      "json_path": "FI-70183",
+      "description": "6K_4K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 254,
+      "data_source_id": 1,
+      "point_name": "POY1_FI70181.PV",
+      "json_path": "FI-70181",
+      "description": "F-A040-A",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 255,
+      "data_source_id": 1,
+      "point_name": "POY1_FI70182.PV",
+      "json_path": "FI-70182",
+      "description": "F-A040-B",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 256,
+      "data_source_id": 1,
+      "point_name": "POY1_FI70186.PV",
+      "json_path": "FI-70186",
+      "description": "4K TANK",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 261,
+      "data_source_id": 1,
+      "point_name": "RT_70583.PV",
+      "json_path": "RT-70583",
+      "description": "to POY????",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 262,
+      "data_source_id": 1,
+      "point_name": "RT_70781.PV",
+      "json_path": "RT-70781",
+      "description": "US_POY(7°)",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 263,
+      "data_source_id": 1,
+      "point_name": "POY1_FI70682.PV",
+      "json_path": "FI-70682",
+      "description": "to Chiller & Comp.",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 264,
+      "data_source_id": 1,
+      "point_name": "POY1_FI70683.PV",
+      "json_path": "FI-70683",
+      "description": "to Chiller",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 265,
+      "data_source_id": 1,
+      "point_name": "POY1_FI70684.PV",
+      "json_path": "FI-70684",
+      "description": "to POY/FDY",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 266,
+      "data_source_id": 1,
+      "point_name": "POY1_FI70786.PV",
+      "json_path": "FI-70786",
+      "description": "",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 267,
+      "data_source_id": 1,
+      "point_name": "POY1_FI70783.PV",
+      "json_path": "FI-70783",
+      "description": "",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 268,
+      "data_source_id": 1,
+      "point_name": "POY1_FI70780.PV",
+      "json_path": "FI-70780",
+      "description": "",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 269,
+      "data_source_id": 1,
+      "point_name": "POY1_FI70777.PV",
+      "json_path": "FI-70777",
+      "description": "",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 270,
+      "data_source_id": 1,
+      "point_name": "POY1_FI70775.PV",
+      "json_path": "FI-70775",
+      "description": "",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 271,
+      "data_source_id": 1,
+      "point_name": "RT_70773.DACA.PV",
+      "json_path": "RT-70773",
+      "description": "",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 272,
+      "data_source_id": 1,
+      "point_name": "DTY1_FI60304.PV",
+      "json_path": "FI-60304",
+      "description": "US_Recycle(7°)",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 273,
+      "data_source_id": 1,
+      "point_name": "DTY1_FI60308.PV",
+      "json_path": "FI-60308",
+      "description": "D-A060-A",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 274,
+      "data_source_id": 1,
+      "point_name": "DTY1_FI60265.PV",
+      "json_path": "FI-60265",
+      "description": "D-A060-B",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 275,
+      "data_source_id": 1,
+      "point_name": "DTY1_FI60367.PV",
+      "json_path": "FI-60367",
+      "description": "6K to 4.5K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 276,
+      "data_source_id": 1,
+      "point_name": "DTY1_FI60312.PV",
+      "json_path": "FI-60312",
+      "description": "6K_AP TANK",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 277,
+      "data_source_id": 1,
+      "point_name": "DTY1_FI60316.PV",
+      "json_path": "FI-60316",
+      "description": "D-A060-C",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 278,
+      "data_source_id": 1,
+      "point_name": "DTY1_FI60315.PV",
+      "json_path": "FI-60315",
+      "description": "D-A060-D",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 279,
+      "data_source_id": 1,
+      "point_name": "DTY1_FI60365.PV",
+      "json_path": "FI-60365",
+      "description": "AI to 6K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 280,
+      "data_source_id": 1,
+      "point_name": "DTY1_FI60364.PV",
+      "json_path": "FI-60364",
+      "description": "6.5K_AI TANK",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 281,
+      "data_source_id": 1,
+      "point_name": "DTY1_FI60204.PV",
+      "json_path": "FI-60204",
+      "description": "D-A045-A",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 282,
+      "data_source_id": 1,
+      "point_name": "DTY1_FI60208.PV",
+      "json_path": "FI-60208",
+      "description": "D-A045-B",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 283,
+      "data_source_id": 1,
+      "point_name": "DTY1_FI60165.PV",
+      "json_path": "FI-60165",
+      "description": "4.5K to 3.2K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 284,
+      "data_source_id": 1,
+      "point_name": "DTY1_FI60264.PV",
+      "json_path": "FI-60264",
+      "description": "4.5K TANK",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 285,
+      "data_source_id": 1,
+      "point_name": "DTY1_FI60166.PV",
+      "json_path": "FI-60166",
+      "description": "3.2K TANK",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 286,
+      "data_source_id": 1,
+      "point_name": "DTY1_FI60166.PV",
+      "json_path": "FI-60166",
+      "description": "3.2K TANK",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 287,
+      "data_source_id": 1,
+      "point_name": "RT_60546.PV",
+      "json_path": "RT-60546",
+      "description": "C-100A",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 288,
+      "data_source_id": 1,
+      "point_name": "RT_60547.PV",
+      "json_path": "RT-60547",
+      "description": "C-100B",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 289,
+      "data_source_id": 1,
+      "point_name": "RT_60548.PV",
+      "json_path": "RT-60548",
+      "description": "C-100C",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 290,
+      "data_source_id": 1,
+      "point_name": "RT_60549.PV",
+      "json_path": "RT-60549",
+      "description": "C-080A",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 291,
+      "data_source_id": 1,
+      "point_name": "RT_60558.PV",
+      "json_path": "RT-60558",
+      "description": "to DTY",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 292,
+      "data_source_id": 1,
+      "point_name": "RT_60560.PV",
+      "json_path": "RT-60560",
+      "description": "to Utility",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 293,
+      "data_source_id": 1,
+      "point_name": "DTY1_FI60617.PV",
+      "json_path": "FI-60617",
+      "description": "to Chiller",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 294,
+      "data_source_id": 1,
+      "point_name": "DTY1_FI60618.PV",
+      "json_path": "FI-60618",
+      "description": "Compressor",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 295,
+      "data_source_id": 1,
+      "point_name": "PI_4102.DACA.PV",
+      "json_path": "PI-4102",
+      "description": "pressure_N2",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 296,
+      "data_source_id": 1,
+      "point_name": "PIC_50411.PIDA.PV",
+      "json_path": "504-1-1",
+      "description": "N2 System",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 297,
+      "data_source_id": 1,
+      "point_name": "",
+      "json_path": "504-3-1",
+      "description": "Dryer U-D706-A",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 298,
+      "data_source_id": 1,
+      "point_name": "",
+      "json_path": "504-6-1",
+      "description": "Dryer U-D706-B",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 299,
+      "data_source_id": 1,
+      "point_name": "",
+      "json_path": "",
+      "description": "Dryer U-D706-C",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 300,
+      "data_source_id": 1,
+      "point_name": "PR50571.PV",
+      "json_path": "PR_50571",
+      "description": "Chiller U-G600-A_Loading",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 301,
+      "data_source_id": 1,
+      "point_name": "PR50575.PV",
+      "json_path": "PR_50575",
+      "description": "Chiller U-G600-B_Loading",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 302,
+      "data_source_id": 1,
+      "point_name": "PR50579.PV",
+      "json_path": "PR_50579",
+      "description": "Chiller U-G600-C_Loading",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 303,
+      "data_source_id": 1,
+      "point_name": "PR50583.PV",
+      "json_path": "PR_50583",
+      "description": "Chiller S-G610-A_Loading",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 304,
+      "data_source_id": 1,
+      "point_name": "PR50587.PV",
+      "json_path": "PR_50587",
+      "description": "Chiller S-G610-B_Loading",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 305,
+      "data_source_id": 1,
+      "point_name": "PR50591.PV",
+      "json_path": "PR_50591",
+      "description": "Chiller S-G610-C_Loading",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 306,
+      "data_source_id": 1,
+      "point_name": "PI3102.DACA.PV",
+      "json_path": "PI-3102",
+      "description": "pressure_SA",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 308,
+      "data_source_id": 1,
+      "point_name": "POY1_PI70446.PV",
+      "json_path": "POY1_PI70446.PV",
+      "description": "12K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 309,
+      "data_source_id": 1,
+      "point_name": "F_D080_1.PV",
+      "json_path": "F_D080_1.PV",
+      "description": "8K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 310,
+      "data_source_id": 1,
+      "point_name": "POY1_PI70246.PV",
+      "json_path": "POY1_PI70246.PV",
+      "description": "8K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 311,
+      "data_source_id": 1,
+      "point_name": "POY1_PI70348.PV",
+      "json_path": "POY1_PI70348.PV",
+      "description": "8K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 312,
+      "data_source_id": 1,
+      "point_name": "F_D060_1.PV",
+      "json_path": "F_D060_1.PV",
+      "description": "6K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 313,
+      "data_source_id": 1,
+      "point_name": "F_D060_2.PV",
+      "json_path": "F_D060_2.PV",
+      "description": "6K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 314,
+      "data_source_id": 1,
+      "point_name": "POY1_PI70248.PV",
+      "json_path": "POY1_PI70248.PV",
+      "description": "6K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 315,
+      "data_source_id": 1,
+      "point_name": "POY1_PI70348.PV",
+      "json_path": "POY1_PI70348.PV",
+      "description": "6K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 316,
+      "data_source_id": 1,
+      "point_name": "POY1_PI70146.PV",
+      "json_path": "POY1_PI70146.PV",
+      "description": "4K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 317,
+      "data_source_id": 1,
+      "point_name": "POY1_TI70502.PV",
+      "json_path": "POY1_TI70502.PV",
+      "description": "WCS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 318,
+      "data_source_id": 1,
+      "point_name": "POY1_TI70501.PV",
+      "json_path": "POY1_TI70501.PV",
+      "description": "WCS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 319,
+      "data_source_id": 1,
+      "point_name": "POY1_PI70548.PV",
+      "json_path": "POY1_PI70548.PV",
+      "description": "WCS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 320,
+      "data_source_id": 1,
+      "point_name": "POY1_TI70547.PV",
+      "json_path": "POY1_TI70547.PV",
+      "description": "WCS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 321,
+      "data_source_id": 1,
+      "point_name": "POY1_TI70603.PV",
+      "json_path": "POY1_TI70603.PV",
+      "description": "WS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 322,
+      "data_source_id": 1,
+      "point_name": "POY1_PI70644.PV",
+      "json_path": "POY1_PI70644.PV",
+      "description": "WS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 323,
+      "data_source_id": 1,
+      "point_name": "DTY1_DPI60371.PV",
+      "json_path": "DTY1_DPI60371.PV",
+      "description": "6K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 324,
+      "data_source_id": 1,
+      "point_name": "DTY1_PI60361B.PV",
+      "json_path": "DTY1_PI60361B.PV",
+      "description": "U_6K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 325,
+      "data_source_id": 1,
+      "point_name": "DTY1_DPI60372.PV",
+      "json_path": "DTY1_DPI60372.PV",
+      "description": "U_6K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 326,
+      "data_source_id": 1,
+      "point_name": "DTY1_DPI60373.PV",
+      "json_path": "DTY1_DPI60373.PV",
+      "description": "U_6K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 327,
+      "data_source_id": 1,
+      "point_name": "DTY1_PI60361A.PV",
+      "json_path": "DTY1_PI60361A.PV",
+      "description": "U_6K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 328,
+      "data_source_id": 1,
+      "point_name": "DTY1_DPI60291.PV",
+      "json_path": "DTY1_DPI60291.PV",
+      "description": "U_4.5K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 329,
+      "data_source_id": 1,
+      "point_name": "DTY1_DPI60293.PV",
+      "json_path": "DTY1_DPI60293.PV",
+      "description": "U_4.5K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 330,
+      "data_source_id": 1,
+      "point_name": "DTY1_PI60261.PV",
+      "json_path": "DTY1_PI60261.PV",
+      "description": "U_4.5K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 331,
+      "data_source_id": 1,
+      "point_name": "DTY1_DPI60167.PV",
+      "json_path": "DTY1_DPI60167.PV",
+      "description": "U_3.2K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 332,
+      "data_source_id": 1,
+      "point_name": "DTY1_DPI60168.PV",
+      "json_path": "DTY1_DPI60168.PV",
+      "description": "U_3.2K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 333,
+      "data_source_id": 1,
+      "point_name": "DTY1_DPI60169.PV",
+      "json_path": "DTY1_DPI60169.PV",
+      "description": "U_3.2K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 334,
+      "data_source_id": 1,
+      "point_name": "DTY1_PI60161.PV",
+      "json_path": "DTY1_PI60161.PV",
+      "description": "U_3.2K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 335,
+      "data_source_id": 1,
+      "point_name": "DTY1_TI60543.PV",
+      "json_path": "DTY1_TI60543.PV",
+      "description": "U_WCS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 336,
+      "data_source_id": 1,
+      "point_name": "DTY1_TI60541.PV",
+      "json_path": "DTY1_TI60541.PV",
+      "description": "U_WCS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 337,
+      "data_source_id": 1,
+      "point_name": "DTY1_PI60544.PV",
+      "json_path": "DTY1_PI60544.PV",
+      "description": "U_WCS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 338,
+      "data_source_id": 1,
+      "point_name": "DTY1_PI60542.PV",
+      "json_path": "DTY1_PI60542.PV",
+      "description": "U_WCS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 339,
+      "data_source_id": 1,
+      "point_name": "DTY1_TI60615.PV",
+      "json_path": "DTY1_TI60615.PV",
+      "description": "U_WS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 340,
+      "data_source_id": 1,
+      "point_name": "DTY1_PI60616.PV",
+      "json_path": "DTY1_PI60616.PV",
+      "description": "U_WS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 341,
+      "data_source_id": 1,
+      "point_name": "POY1_PI70346.PV",
+      "json_path": "POY1_PI70346.PV",
+      "description": "8K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 342,
+      "data_source_id": 1,
+      "point_name": "POY1_PI70547.PV",
+      "json_path": "POY1_PI70547.PV",
+      "description": "WCS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 343,
+      "data_source_id": 1,
+      "point_name": "DTY1_PI_60542.PV",
+      "json_path": "DTY1_PI_60542.PV",
+      "description": "WCS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 344,
+      "data_source_id": 1,
+      "point_name": "TI50518.PV",
+      "json_path": "TI50518.PV",
+      "description": "CHILLER",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 345,
+      "data_source_id": 1,
+      "point_name": "TI50519.PV",
+      "json_path": "TI50519.PV",
+      "description": "CHILLER",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 346,
+      "data_source_id": 1,
+      "point_name": "TI50523.PV",
+      "json_path": "TI50523.PV",
+      "description": "CHILLER",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 347,
+      "data_source_id": 1,
+      "point_name": "TI50524.PV",
+      "json_path": "TI50524.PV",
+      "description": "CHILLER",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 348,
+      "data_source_id": 1,
+      "point_name": "TI50528.PV",
+      "json_path": "TI50528.PV",
+      "description": "CHILLER",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 349,
+      "data_source_id": 1,
+      "point_name": "TI50529.PV",
+      "json_path": "TI50529.PV",
+      "description": "CHILLER",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 350,
+      "data_source_id": 1,
+      "point_name": "TI50533.PV",
+      "json_path": "TI50533.PV",
+      "description": "CHILLER",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 351,
+      "data_source_id": 1,
+      "point_name": "TI50534.PV",
+      "json_path": "TI50534.PV",
+      "description": "CHILLER",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 352,
+      "data_source_id": 1,
+      "point_name": "TI50538.PV",
+      "json_path": "TI50538.PV",
+      "description": "CHILLER",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 353,
+      "data_source_id": 1,
+      "point_name": "TI50539.PV",
+      "json_path": "TI50539.PV",
+      "description": "CHILLER",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 354,
+      "data_source_id": 1,
+      "point_name": "TI50543.PV",
+      "json_path": "TI50543.PV",
+      "description": "CHILLER",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 355,
+      "data_source_id": 1,
+      "point_name": "TI50544.PV",
+      "json_path": "TI50544.PV",
+      "description": "CHILLER",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 356,
+      "data_source_id": 1,
+      "point_name": "TI_50544_S.DACA.PV",
+      "json_path": "TI_50544_S.DACA.PV",
+      "description": "Utility",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 357,
+      "data_source_id": 1,
+      "point_name": "TI_50541_S.DACA.PV",
+      "json_path": "TI_50541_S.DACA.PV",
+      "description": "Utility",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 358,
+      "data_source_id": 1,
+      "point_name": "TI_50540_S.DACA.PV",
+      "json_path": "TI_50540_S.DACA.PV",
+      "description": "Utility",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 359,
+      "data_source_id": 1,
+      "point_name": "TI_50543_S.DACA.PV",
+      "json_path": "TI_50543_S.DACA.PV",
+      "description": "CP",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 360,
+      "data_source_id": 1,
+      "point_name": "TI_50542_S.DACA.PV",
+      "json_path": "TI_50542_S.DACA.PV",
+      "description": "CP",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 361,
+      "data_source_id": 1,
+      "point_name": "TI_8401_S_SSP.DACA.PV",
+      "json_path": "TI_8401_S_SSP.DACA.PV",
+      "description": "SSP",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 362,
+      "data_source_id": 1,
+      "point_name": "RSSP02_TI_8401_S.PV",
+      "json_path": "RT_8401RSSP.DACA.PV",
+      "description": "SSP Rpet",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 363,
+      "data_source_id": 1,
+      "point_name": "TI_3001_S.DACA.PV",
+      "json_path": "TI_3001_S.DACA.PV",
+      "description": "CP2",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 364,
+      "data_source_id": 1,
+      "point_name": "POY1_TI70523.PV",
+      "json_path": "POY1_TI70523.PV",
+      "description": "WCS TEMP.",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 365,
+      "data_source_id": 1,
+      "point_name": "POY1_TI70524.PV",
+      "json_path": "POY1_TI70524.PV",
+      "description": "WCS TEMP.",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 366,
+      "data_source_id": 1,
+      "point_name": "POY1_TI70511.PV",
+      "json_path": "POY1_TI70511.PV",
+      "description": "WCS TEMP.",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 367,
+      "data_source_id": 1,
+      "point_name": "POY1_TI70512.PV",
+      "json_path": "POY1_TI70512.PV",
+      "description": "WCS TEMP.",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 368,
+      "data_source_id": 1,
+      "point_name": "POY1_TI70517.PV",
+      "json_path": "POY1_TI70517.PV",
+      "description": "WCS TEMP.",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 369,
+      "data_source_id": 1,
+      "point_name": "POY1_TI70518.PV",
+      "json_path": "POY1_TI70518.PV",
+      "description": "WCS TEMP.",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 370,
+      "data_source_id": 1,
+      "point_name": "RT_70781.PV",
+      "json_path": "RT_70781.PV",
+      "description": "WCS TEMP.",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 371,
+      "data_source_id": 1,
+      "point_name": "RT_70773.DACA.PV",
+      "json_path": "RT_70773.DACA.PV",
+      "description": "POY?? - DTY",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 372,
+      "data_source_id": 1,
+      "point_name": "DTY1_TI60557.PV",
+      "json_path": "DTY1_TI60557.PV",
+      "description": "POY?? - DTY",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 373,
+      "data_source_id": 1,
+      "point_name": "DTY1_TI60556.PV",
+      "json_path": "DTY1_TI60556.PV",
+      "description": "POY?? - DTY",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 374,
+      "data_source_id": 1,
+      "point_name": "DTY1_TI60551.PV",
+      "json_path": "DTY1_TI60551.PV",
+      "description": "POY?? - DTY",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 375,
+      "data_source_id": 1,
+      "point_name": "DTY1_TI60550.PV",
+      "json_path": "DTY1_TI60550.PV",
+      "description": "POY?? - DTY",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 376,
+      "data_source_id": 1,
+      "point_name": "DTY1_TI60553.PV",
+      "json_path": "DTY1_TI60553.PV",
+      "description": "POY?? - DTY",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 377,
+      "data_source_id": 1,
+      "point_name": "DTY1_TI60552.PV",
+      "json_path": "DTY1_TI60552.PV",
+      "description": "POY?? - DTY",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 378,
+      "data_source_id": 1,
+      "point_name": "DTY1_TI60555.PV",
+      "json_path": "DTY1_TI60555.PV",
+      "description": "POY?? - DTY",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 379,
+      "data_source_id": 1,
+      "point_name": "DTY1_TI60554.PV",
+      "json_path": "DTY1_TI60554.PV",
+      "description": "POY?? - DTY",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 380,
+      "data_source_id": 1,
+      "point_name": "PR50572.PV",
+      "json_path": "PR50572.PV",
+      "description": "Utility - Polytex Chiller Running Status",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 381,
+      "data_source_id": 1,
+      "point_name": "PR50576.PV",
+      "json_path": "PR50576.PV",
+      "description": "Utility - Polytex Chiller Running Status",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 382,
+      "data_source_id": 1,
+      "point_name": "PR50580.PV",
+      "json_path": "PR50580.PV",
+      "description": "Utility - Polytex Chiller Running Status",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 383,
+      "data_source_id": 1,
+      "point_name": "PR50584.PV",
+      "json_path": "PR50584.PV",
+      "description": "PSF - Polytex Chiller Running Status",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 384,
+      "data_source_id": 1,
+      "point_name": "PR50588.PV",
+      "json_path": "PR50588.PV",
+      "description": "PSF - Polytex Chiller Running Status",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 385,
+      "data_source_id": 1,
+      "point_name": "PR50592.PV",
+      "json_path": "PR50592.PV",
+      "description": "PSF - Polytex Chiller Running Status",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 386,
+      "data_source_id": 1,
+      "point_name": "FI5106.DACA.PV",
+      "json_path": "FI5106.DACA.PV",
+      "description": "PSF - 6K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 387,
+      "data_source_id": 1,
+      "point_name": "FI5101.DACA.PV",
+      "json_path": "FI5101.DACA.PV",
+      "description": "PSF - AI",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 388,
+      "data_source_id": 1,
+      "point_name": "FI50641.DACA.PV",
+      "json_path": "FI50641.DACA.PV",
+      "description": "PSF - WS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 389,
+      "data_source_id": 1,
+      "point_name": "DTY1_FQI60104.PV",
+      "json_path": "DTY1_FQI60104.PV",
+      "description": "DTY - 3.2K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 390,
+      "data_source_id": 1,
+      "point_name": "DTY1_FQI60114.PV",
+      "json_path": "DTY1_FQI60114.PV",
+      "description": "DTY - 3.2K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 391,
+      "data_source_id": 1,
+      "point_name": "DTY1_FQI60124.PV",
+      "json_path": "DTY1_FQI60124.PV",
+      "description": "DTY - 3.2K",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 392,
+      "data_source_id": 1,
+      "point_name": "TI_36122_S.DACA.PV",
+      "json_path": "TI_36122_S.DACA.PV",
+      "description": "WCS TEMP.",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 393,
+      "data_source_id": 1,
+      "point_name": "POY1_TI70781.PV",
+      "json_path": "POY1_TI70781.PV",
+      "description": "WCS TEMP.",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 394,
+      "data_source_id": 1,
+      "point_name": "RT_70781.DACA.PV",
+      "json_path": "RT_70781.DACA.PV",
+      "description": "WCS RT",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 395,
+      "data_source_id": 1,
+      "point_name": "POY1_TIWCS.PV",
+      "json_path": "POY1_TIWCS.PV",
+      "description": "WCS TEMP.",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 396,
+      "data_source_id": 1,
+      "point_name": "POY1_DPI70191.PV",
+      "json_path": "POY1_DPI70191.PV",
+      "description": "D-040-A",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 397,
+      "data_source_id": 1,
+      "point_name": "POY1_DPI70192.PV",
+      "json_path": "POY1_DPI70192.PV",
+      "description": "D-040-B",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 398,
+      "data_source_id": 1,
+      "point_name": "POY1_DPI70193.PV",
+      "json_path": "POY1_DPI70193.PV",
+      "description": "D-040-C",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 399,
+      "data_source_id": 1,
+      "point_name": "POY1_DPI70291.PV",
+      "json_path": "POY1_DPI70291.PV",
+      "description": "D-060-A",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 400,
+      "data_source_id": 1,
+      "point_name": "POY1_DPI70292.PV",
+      "json_path": "POY1_DPI70292.PV",
+      "description": "D-060-B",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 401,
+      "data_source_id": 1,
+      "point_name": "POY1_DPI70391.PV",
+      "json_path": "POY1_DPI70391.PV",
+      "description": "D-060-1",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 402,
+      "data_source_id": 1,
+      "point_name": "POY1_DPI70392.PV",
+      "json_path": "POY1_DPI70392.PV",
+      "description": "D-060-2",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 403,
+      "data_source_id": 1,
+      "point_name": "POY1_DPI70393.PV",
+      "json_path": "POY1_DPI70393.PV",
+      "description": "D-080-1",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 404,
+      "data_source_id": 1,
+      "point_name": "DTY1_FI60104.PV",
+      "json_path": "DTY1_FI60104.PV",
+      "description": "D-A032-A",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 405,
+      "data_source_id": 1,
+      "point_name": "DTY1_FI60114.PV",
+      "json_path": "DTY1_FI60114.PV",
+      "description": "D-A032-B",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 406,
+      "data_source_id": 1,
+      "point_name": "DTY1_FI60124.PV",
+      "json_path": "DTY1_FI60124.PV",
+      "description": "D-A032-C",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 407,
+      "data_source_id": 1,
+      "point_name": "RSSP01_FT_8502.PV",
+      "json_path": "RSSP01_FT_8502.PV",
+      "description": "RSSP to SSP",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 408,
+      "data_source_id": 1,
+      "point_name": "DTY1_DC100B_01.PV",
+      "json_path": "DTY1_DC100B_01.PV",
+      "description": "D-C100-B",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 409,
+      "data_source_id": 1,
+      "point_name": "DTY1_DC100C_01.PV",
+      "json_path": "DTY1_DC100C_01.PV",
+      "description": "D-C100-C",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 410,
+      "data_source_id": 1,
+      "point_name": "DTY1_DC080A_01.PV",
+      "json_path": "DTY1_DC080A_01.PV",
+      "description": "D-C080-A",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 411,
+      "data_source_id": 1,
+      "point_name": "DTY1_DC100A_08.PV",
+      "json_path": "DTY1_DC100A_08.PV",
+      "description": "D-C100-A",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 412,
+      "data_source_id": 1,
+      "point_name": "DTY1_DC100B_08.PV",
+      "json_path": "DTY1_DC100B_08.PV",
+      "description": "D-C100-B",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 413,
+      "data_source_id": 1,
+      "point_name": "DTY1_DC100C_08.PV",
+      "json_path": "DTY1_DC100C_08.PV",
+      "description": "D-C100-C",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 414,
+      "data_source_id": 1,
+      "point_name": "DTY1_DC080A_08.PV",
+      "json_path": "DTY1_DC080A_08.PV",
+      "description": "D-C080-A",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 415,
+      "data_source_id": 1,
+      "point_name": "RT_60546.DACA.PV",
+      "json_path": "RT_60546.DACA.PV",
+      "description": "D-C100-A_RT",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 416,
+      "data_source_id": 1,
+      "point_name": "RT_60547.DACA.PV",
+      "json_path": "RT_60547.DACA.PV",
+      "description": "D-C100-B_RT",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 417,
+      "data_source_id": 1,
+      "point_name": "RT_60548.DACA.PV",
+      "json_path": "RT_60548.DACA.PV",
+      "description": "D-C100-C_RT",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 418,
+      "data_source_id": 1,
+      "point_name": "RT_60549.DACA.PV",
+      "json_path": "RT_60549.DACA.PV",
+      "description": "D-C080-A_RT",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 419,
+      "data_source_id": 1,
+      "point_name": "RT_70584.DACA.PV",
+      "json_path": "RT_70584.DACA.PV",
+      "description": "F-C100-A_RT",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 420,
+      "data_source_id": 1,
+      "point_name": "RT_70585.DACA.PV",
+      "json_path": "RT_70585.DACA.PV",
+      "description": "F-C100-B_RT",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 421,
+      "data_source_id": 1,
+      "point_name": "RT_70586.DACA.PV",
+      "json_path": "RT_70586.DACA.PV",
+      "description": "F-C080-A_RT",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 422,
+      "data_source_id": 1,
+      "point_name": "RT_70582.DACA.PV",
+      "json_path": "RT_70582.DACA.PV",
+      "description": "WCS(POY)_US_RT",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 423,
+      "data_source_id": 1,
+      "point_name": "FI_35615.DACA.PV",
+      "json_path": "FI_35615.DACA.PV",
+      "description": "CP_WS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 424,
+      "data_source_id": 1,
+      "point_name": "FI_50404.DACA.PV",
+      "json_path": "FI_50404.DACA.PV",
+      "description": "US_WS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 425,
+      "data_source_id": 1,
+      "point_name": "FI_50530.DACA.PV",
+      "json_path": "FI_50530.DACA.PV",
+      "description": "US_WCS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 426,
+      "data_source_id": 1,
+      "point_name": "FI_50610.DACA.PV",
+      "json_path": "FI_50610.DACA.PV",
+      "description": "PSF_WS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 427,
+      "data_source_id": 1,
+      "point_name": "FI50745.DACA.PV",
+      "json_path": "FI50745.DACA.PV",
+      "description": "PSF_WCS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 428,
+      "data_source_id": 1,
+      "point_name": "POY1_FI70681.PV",
+      "json_path": "POY1_FI70681.PV",
+      "description": "POY_WS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 429,
+      "data_source_id": 1,
+      "point_name": "POY1_FI70587.PV",
+      "json_path": "POY1_FI70587.PV",
+      "description": "POY_WCS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 430,
+      "data_source_id": 1,
+      "point_name": "POY1_FI70789.PV",
+      "json_path": "POY1_FI70789.PV",
+      "description": "POY_TOTAL",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 431,
+      "data_source_id": 1,
+      "point_name": "DTY1_FI600302.PV",
+      "json_path": "DTY1_FI600302.PV",
+      "description": "DTY_TOTAL",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 432,
+      "data_source_id": 1,
+      "point_name": "DTY1_FI600303.PV",
+      "json_path": "DTY1_FI600303.PV",
+      "description": "DTY_FFW POOL",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 433,
+      "data_source_id": 1,
+      "point_name": "DTY1_FI600310.PV",
+      "json_path": "DTY1_FI600310.PV",
+      "description": "DTY_GARDENING",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 434,
+      "data_source_id": 1,
+      "point_name": "DTY1_FI600311.PV",
+      "json_path": "DTY1_FI600311.PV",
+      "description": "DTY_TMT",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 435,
+      "data_source_id": 1,
+      "point_name": "DTY1_FI600312.PV",
+      "json_path": "DTY1_FI600312.PV",
+      "description": "DTY_BARMAG",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 436,
+      "data_source_id": 1,
+      "point_name": "DTY1_FI60613.PV",
+      "json_path": "DTY1_FI60613.PV",
+      "description": "DTY_WS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 437,
+      "data_source_id": 1,
+      "point_name": "DTY1_FI60575.PV",
+      "json_path": "DTY1_FI60575.PV",
+      "description": "DTY_WCS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 532,
+      "data_source_id": 1,
+      "point_name": "DTY1_DC100A_01.PV",
+      "json_path": "DTY1_DC100A_01.PV",
+      "description": "D-C100-A",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 533,
+      "data_source_id": 1,
+      "point_name": "FI50610.DACA.PV",
+      "json_path": "FI50610.DACA.PV",
+      "description": "PSF_WS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 671,
+      "data_source_id": 1,
+      "point_name": "21-AMPS-P.PV",
+      "json_path": "21-AMPS-P.PV",
+      "description": "POY | Polytex Chiller Running Status Table | F-C100-A",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 672,
+      "data_source_id": 1,
+      "point_name": "22-AMPS-P.PV",
+      "json_path": "22-AMPS-P.PV",
+      "description": "POY | Polytex Chiller Running Status Table | F-C100-B",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 673,
+      "data_source_id": 1,
+      "point_name": "23-AMPS-P.PV",
+      "json_path": "23-AMPS-P.PV",
+      "description": "POY | Polytex Chiller Running Status Table | F-C080-A",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 674,
+      "data_source_id": 1,
+      "point_name": "21-KW.PV",
+      "json_path": "21-KW.PV",
+      "description": "POY | Polytex Chiller Running Status Table | F-C100-A",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 675,
+      "data_source_id": 1,
+      "point_name": "22-KW.PV",
+      "json_path": "22-KW.PV",
+      "description": "POY | Polytex Chiller Running Status Table | F-C100-B",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 676,
+      "data_source_id": 1,
+      "point_name": "23-KW.PV",
+      "json_path": "23-KW.PV",
+      "description": "POY | Polytex Chiller Running Status Table | F-C080-A",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 677,
+      "data_source_id": 1,
+      "point_name": "4Ha_FI_LS01.PV",
+      "json_path": "4Ha_FI_LS01.PV",
+      "description": "4ha | Steam | 4ha-Steam",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 678,
+      "data_source_id": 1,
+      "point_name": "4Ha_FT123.PV",
+      "json_path": "4Ha_FT123.PV",
+      "description": "4ha | Steam | WWT(4ha)-Steam",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 679,
+      "data_source_id": 1,
+      "point_name": "4Ha_FI_80403.PV",
+      "json_path": "4Ha_FI_80403.PV",
+      "description": "4ha | SP | Total 4ha",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 680,
+      "data_source_id": 1,
+      "point_name": "4Ha_FI_CW01.PV",
+      "json_path": "4Ha_FI_CW01.PV",
+      "description": "4ha | WS | WS-Washing line",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 681,
+      "data_source_id": 1,
+      "point_name": "4Ha_FI_CW02.PV",
+      "json_path": "4Ha_FI_CW02.PV",
+      "description": "4ha | WS | WS-Pet line",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 682,
+      "data_source_id": 1,
+      "point_name": "4Ha_FI_80335.PV",
+      "json_path": "4Ha_FI_80335.PV",
+      "description": "4ha | WS | WS-Utility",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 683,
+      "data_source_id": 1,
+      "point_name": "4Ha_PT_80358.PV",
+      "json_path": "4Ha_PT_80358.PV",
+      "description": "4ha | WS | pressure WS-4ha",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 684,
+      "data_source_id": 1,
+      "point_name": "4Ha_PT_80326.PV",
+      "json_path": "4Ha_PT_80326.PV",
+      "description": "4ha | WS | pressure WS-Utility",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 685,
+      "data_source_id": 1,
+      "point_name": "4Ha_TE_80327.PV",
+      "json_path": "4Ha_TE_80327.PV",
+      "description": "4ha | WS | Temperature_WS",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 686,
+      "data_source_id": 1,
+      "point_name": "4Ha_DPI_8025.PV",
+      "json_path": "4Ha_DPI_8025.PV",
+      "description": "4ha | 8K | AP-8K Dew point",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 687,
+      "data_source_id": 1,
+      "point_name": "4Ha_DPI_8024.PV",
+      "json_path": "4Ha_DPI_8024.PV",
+      "description": "4ha | 8K | AP-8K Dew point",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 688,
+      "data_source_id": 1,
+      "point_name": "4Ha_DPI_8023.PV",
+      "json_path": "4Ha_DPI_8023.PV",
+      "description": "4ha | 8K | AP-8K Dew point",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 689,
+      "data_source_id": 1,
+      "point_name": "4Ha_FI_RO02.PV",
+      "json_path": "4Ha_FI_RO02.PV",
+      "description": "4ha | SI | 4ha-SI",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 690,
+      "data_source_id": 1,
+      "point_name": "4Ha_FI_80405.PV",
+      "json_path": "4Ha_FI_80405.PV",
+      "description": "4ha | WI | 4ha-Total",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 691,
+      "data_source_id": 1,
+      "point_name": "4Ha_FI_WI01.PV",
+      "json_path": "4Ha_FI_WI01.PV",
+      "description": "4ha | WI | 4ha-Washing line",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 692,
+      "data_source_id": 1,
+      "point_name": "4Ha_FI_WI02.PV",
+      "json_path": "4Ha_FI_WI02.PV",
+      "description": "4ha | WI | 4ha-Pet line",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 693,
+      "data_source_id": 1,
+      "point_name": "4Ha_FI_80337.PV",
+      "json_path": "4Ha_FI_80337.PV",
+      "description": "4ha | WI | 4ha-Cooling Tower",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 694,
+      "data_source_id": 1,
+      "point_name": "4Ha_FI_AP01.PV",
+      "json_path": "4Ha_FI_AP01.PV",
+      "description": "4ha | AP 8K | 4ha-Washing line",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 695,
+      "data_source_id": 1,
+      "point_name": "4Ha_FI_AP02.PV",
+      "json_path": "4Ha_FI_AP02.PV",
+      "description": "4ha | AP 8K | 4ha-Pet line",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 696,
+      "data_source_id": 1,
+      "point_name": "4Ha_PT_80276.PV",
+      "json_path": "4Ha_PT_80276.PV",
+      "description": "4ha | AP 8K | AP-8K pressure",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 697,
+      "data_source_id": 1,
+      "point_name": "4Ha_FI_AI01.PV",
+      "json_path": "4Ha_FI_AI01.PV",
+      "description": "4ha | AI | 4ha-Washing line",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 698,
+      "data_source_id": 1,
+      "point_name": "4Ha_FI_AI02.PV",
+      "json_path": "4Ha_FI_AI02.PV",
+      "description": "4ha | AI | 4ha-Pet line",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 699,
+      "data_source_id": 1,
+      "point_name": "4Ha_PT_80278.PV",
+      "json_path": "4Ha_PT_80278.PV",
+      "description": "4ha | AI | AI-6K pressure",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 700,
+      "data_source_id": 1,
+      "point_name": "4Ha_FT_101.PV",
+      "json_path": "4Ha_FT_101.PV",
+      "description": "4ha | WWT(4ha) | Low-concentration wastewater",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 701,
+      "data_source_id": 1,
+      "point_name": "4Ha_FT_103.PV",
+      "json_path": "4Ha_FT_103.PV",
+      "description": "4ha | WWT(4ha) | High-concentration wastewater",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 702,
+      "data_source_id": 1,
+      "point_name": "4Ha_FT_119.PV",
+      "json_path": "4Ha_FT_119.PV",
+      "description": "4ha | WWT(4ha) | Discharged wastewater",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 703,
+      "data_source_id": 1,
+      "point_name": "4Ha_AT_119A.PV",
+      "json_path": "4Ha_AT_119A.PV",
+      "description": "4ha | WWT(4ha) | COD online",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 704,
+      "data_source_id": 1,
+      "point_name": "FT-01A.PV",
+      "json_path": "FT-01A.PV",
+      "description": "WWT(100ha) | Ester waste water",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 705,
+      "data_source_id": 1,
+      "point_name": "FT-201A.PV",
+      "json_path": "FT-201A.PV",
+      "description": "WWT(100ha) | Grease oil waste water",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 706,
+      "data_source_id": 1,
+      "point_name": "FI5121.DACA.PV",
+      "json_path": "FI5121.DACA.PV",
+      "description": "WWT(100ha) | PSF grease oil WW",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 707,
+      "data_source_id": 1,
+      "point_name": "FT-FGD.PV",
+      "json_path": "FT-FGD.PV",
+      "description": "WWT(100ha) | FGD waste water",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 708,
+      "data_source_id": 1,
+      "point_name": "FT-16A.PV",
+      "json_path": "FT-16A.PV",
+      "description": "WWT(100ha) | Cooling waste water",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 709,
+      "data_source_id": 1,
+      "point_name": "POY1_FI70685.PV",
+      "json_path": "POY1_FI70685.PV",
+      "description": "WWT(100ha) | POY cooling WW",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 710,
+      "data_source_id": 1,
+      "point_name": "FI50631.DACA.PV",
+      "json_path": "FI50631.DACA.PV",
+      "description": "WWT(100ha) | PSF cooling WW",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 711,
+      "data_source_id": 1,
+      "point_name": "FT-EFF.PV",
+      "json_path": "FT-EFF.PV",
+      "description": "WWT(100ha) | Total Integrated WW",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 712,
+      "data_source_id": 1,
+      "point_name": "FI5126.DACA.PV",
+      "json_path": "FI5126.DACA.PV",
+      "description": "WWT(100ha) | PSF Integrated WW",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 713,
+      "data_source_id": 1,
+      "point_name": "POY1_FI70788.PV",
+      "json_path": "POY1_FI70788.PV",
+      "description": "WWT(100ha) | POY Integrated WW",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 714,
+      "data_source_id": 1,
+      "point_name": "rSSP02_FT_8901.PV",
+      "json_path": "rSSP02_FT_8901.PV",
+      "description": "WWT(100ha) | r-SSP EFF total",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 715,
+      "data_source_id": 1,
+      "point_name": "rSSP02_FT_9001.PV",
+      "json_path": "rSSP02_FT_9001.PV",
+      "description": "WWT(100ha) | r-SSP EFF total",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 716,
+      "data_source_id": 1,
+      "point_name": "FI_16801.DACA.PV",
+      "json_path": "FI_16801.DACA.PV",
+      "description": "WWT(100ha) | CP & SSP EFF",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 717,
+      "data_source_id": 1,
+      "point_name": "FT-DTY.PV",
+      "json_path": "FT-DTY.PV",
+      "description": "WWT(100ha) | DTY EFF total",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 718,
+      "data_source_id": 1,
+      "point_name": "POY1_FI70772.PV",
+      "json_path": "POY1_FI70772.PV",
+      "description": "WWT(100ha) | Recycle EFF",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    },
+    {
+      "external_id": 719,
+      "data_source_id": 1,
+      "point_name": "AT_11B.PV",
+      "json_path": "AT_11B.PV",
+      "description": "WWT(100ha) | COD online",
+      "source_is_active": true,
+      "point_type": "",
+      "fetch_interval_minutes": 60
+    }
+  ]
+}

@@ -30,6 +30,12 @@ A robust, web-based utility data collection and analytics portal designed for co
 ### 6. One-click Database Backup
 * **Zero-config Backups:** Admins can download a full backup copy of the SQLite `.db` database directly from the dashboard heading with a single click.
 
+### 7. EMS Utility Point Configuration
+* **Bundled Point Catalog:** Imports 388 `UtilityDepartment` points into SQLite from a versioned deployment snapshot.
+* **Safe Automatic Updates:** On application startup, the manifest checksum is compared with the last successful catalog version. Source metadata is updated only when needed, while manually entered EMS settings are preserved.
+* **Admin-only Configuration:** Administrators can search and filter points, enable or disable monitoring, configure upper/lower alarm limits, and classify points by energy type, measurement type, unit, location, equipment, value type, aggregation method, and flow direction.
+* **Bulk Operations and Export:** Selected points can be updated in bulk, and the complete EMS configuration can be exported to Excel.
+
 ---
 
 ## 🛠️ Technology Stack
@@ -159,6 +165,18 @@ erDiagram
    * **Default Admin Credentials:**
      * **Username:** `admin`
      * **Password:** `1234`
+
+### Refreshing the Utility Point Catalog
+
+On a machine that can reach the read-only local DGC query API:
+
+```bash
+python scripts/export_utility_points.py --version 2026.09.18.2
+```
+
+Commit the updated files under `seed_data/` and deploy normally. The next application reload automatically imports the new catalog when its checksum changes. New points default to monitoring enabled; missing points are retained and marked as missing; existing EMS settings are never overwritten.
+
+For PythonAnywhere setup, persistent SQLite paths, WSGI configuration, and the deployment workflow, see [`PYTHONANYWHERE_DEPLOYMENT.md`](PYTHONANYWHERE_DEPLOYMENT.md).
 
 ---
 

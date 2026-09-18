@@ -1,6 +1,11 @@
 from __future__ import annotations
 
+import hashlib
+import json
+import math
+import os
 import sqlite3
+import threading
 from datetime import date
 from io import BytesIO
 from pathlib import Path
@@ -10,8 +15,12 @@ from openpyxl import Workbook
 
 
 BASE_DIR = Path(__file__).resolve().parent
-DB_PATH = BASE_DIR / "instance" / "app.db"
-APP_VERSION = "0.6.7"
+DB_PATH = Path(os.environ.get("ENERGY_DATABASE_PATH", BASE_DIR / "instance" / "app.db"))
+POINT_SEED_PATH = BASE_DIR / "seed_data" / "utility_points.json"
+POINT_MANIFEST_PATH = BASE_DIR / "seed_data" / "utility_points_manifest.json"
+APP_VERSION = "0.7.0"
+_DB_INIT_LOCK = threading.Lock()
+_INITIALIZED_DB_PATH: Path | None = None
 
 VI_TRANSLATIONS = {
     "能源資料填報系統": "Hệ thống khai báo dữ liệu năng lượng",
@@ -178,7 +187,7 @@ VI_TRANSLATIONS = {
 
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "dev-secret-change-me"
+app.config["SECRET_KEY"] = os.environ.get("ENERGY_SECRET_KEY", "dev-secret-change-me")
 
 
 def translate(text: str) -> str:
@@ -275,9 +284,11 @@ def previous_report_month(value: str) -> str:
 
 def get_db() -> sqlite3.Connection:
     if "db" not in g:
-        DB_PATH.parent.mkdir(exist_ok=True)
-        g.db = sqlite3.connect(DB_PATH)
+        DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+        g.db = sqlite3.connect(DB_PATH, timeout=10)
         g.db.row_factory = sqlite3.Row
+        g.db.execute("PRAGMA foreign_keys = ON")
+        g.db.execute("PRAGMA busy_timeout = 10000")
     return g.db
 
 
@@ -392,14 +403,132 @@ def init_db() -> None:
             created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(id)
         );
+
+        CREATE TABLE IF NOT EXISTS device_sources (
+            external_id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL,
+            api_url TEXT,
+            source_is_active INTEGER NOT NULL DEFAULT 1,
+            last_synced_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS device_data_points (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            external_id INTEGER NOT NULL,
+            data_source_id INTEGER NOT NULL,
+            point_name TEXT,
+            json_path TEXT,
+            description TEXT,
+            source_is_active INTEGER NOT NULL DEFAULT 1,
+            point_type TEXT,
+            fetch_interval_minutes INTEGER,
+            source_present INTEGER NOT NULL DEFAULT 1,
+            source_checksum TEXT,
+            last_synced_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(data_source_id, external_id),
+            FOREIGN KEY (data_source_id) REFERENCES device_sources(external_id)
+        );
+
+        CREATE TABLE IF NOT EXISTS ems_energy_categories (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL UNIQUE,
+            display_order INTEGER NOT NULL DEFAULT 0,
+            active INTEGER NOT NULL DEFAULT 1
+        );
+
+        CREATE TABLE IF NOT EXISTS ems_measurement_types (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL UNIQUE,
+            display_order INTEGER NOT NULL DEFAULT 0,
+            active INTEGER NOT NULL DEFAULT 1
+        );
+
+        CREATE TABLE IF NOT EXISTS ems_units (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL UNIQUE,
+            display_order INTEGER NOT NULL DEFAULT 0,
+            active INTEGER NOT NULL DEFAULT 1
+        );
+
+        CREATE TABLE IF NOT EXISTS ems_locations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL UNIQUE,
+            display_order INTEGER NOT NULL DEFAULT 0,
+            active INTEGER NOT NULL DEFAULT 1
+        );
+
+        CREATE TABLE IF NOT EXISTS ems_point_configs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            point_id INTEGER NOT NULL UNIQUE,
+            monitor_enabled INTEGER NOT NULL DEFAULT 1,
+            lower_limit REAL,
+            upper_limit REAL,
+            display_name TEXT,
+            energy_category_id INTEGER,
+            measurement_type_id INTEGER,
+            unit_id INTEGER,
+            location_id INTEGER,
+            equipment_name TEXT,
+            value_type TEXT,
+            aggregation_method TEXT,
+            flow_direction TEXT,
+            alarm_severity TEXT NOT NULL DEFAULT 'warning',
+            alarm_delay_minutes INTEGER NOT NULL DEFAULT 5,
+            alarm_value_mode TEXT NOT NULL DEFAULT 'raw',
+            alarm_consecutive_samples INTEGER NOT NULL DEFAULT 1,
+            alarm_deadband REAL NOT NULL DEFAULT 0,
+            notes TEXT,
+            updated_by INTEGER,
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (point_id) REFERENCES device_data_points(id),
+            FOREIGN KEY (energy_category_id) REFERENCES ems_energy_categories(id),
+            FOREIGN KEY (measurement_type_id) REFERENCES ems_measurement_types(id),
+            FOREIGN KEY (unit_id) REFERENCES ems_units(id),
+            FOREIGN KEY (location_id) REFERENCES ems_locations(id),
+            FOREIGN KEY (updated_by) REFERENCES users(id)
+        );
+
+        CREATE TABLE IF NOT EXISTS point_catalog_versions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            data_source_id INTEGER NOT NULL,
+            version TEXT NOT NULL,
+            checksum TEXT NOT NULL,
+            record_count INTEGER NOT NULL,
+            added_count INTEGER NOT NULL DEFAULT 0,
+            updated_count INTEGER NOT NULL DEFAULT 0,
+            missing_count INTEGER NOT NULL DEFAULT 0,
+            status TEXT NOT NULL,
+            details TEXT,
+            imported_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_device_points_source
+            ON device_data_points(data_source_id, source_present, source_is_active);
+        CREATE INDEX IF NOT EXISTS idx_ems_configs_monitor
+            ON ems_point_configs(monitor_enabled);
+        CREATE INDEX IF NOT EXISTS idx_point_catalog_source
+            ON point_catalog_versions(data_source_id, imported_at);
         """
     )
     if "viewer" not in {
         row["name"] for row in db.execute("PRAGMA table_info(users)").fetchall()
     }:
         db.execute("ALTER TABLE users ADD COLUMN viewer INTEGER NOT NULL DEFAULT 0")
+    ems_config_columns = {
+        row["name"] for row in db.execute("PRAGMA table_info(ems_point_configs)").fetchall()
+    }
+    if "alarm_value_mode" not in ems_config_columns:
+        db.execute(
+            "ALTER TABLE ems_point_configs ADD COLUMN alarm_value_mode TEXT NOT NULL DEFAULT 'raw'"
+        )
+    if "alarm_consecutive_samples" not in ems_config_columns:
+        db.execute(
+            "ALTER TABLE ems_point_configs "
+            "ADD COLUMN alarm_consecutive_samples INTEGER NOT NULL DEFAULT 1"
+        )
     seed_defaults(db)
     seed_control_limits(db)
+    seed_ems_lookups(db)
     if not area_permissions_exist:
         # Existing fillers used to have access to every area. Preserve that
         # behavior when introducing X-axis permissions.
@@ -413,6 +542,7 @@ def init_db() -> None:
             """
         )
     db.commit()
+    sync_bundled_device_points(db)
 
 
 def seed_control_limits(db: sqlite3.Connection, replace: bool = False, percentage: float = 0.1) -> None:
@@ -495,9 +625,259 @@ def seed_defaults(db: sqlite3.Connection) -> None:
         )
 
 
+def seed_ems_lookups(db: sqlite3.Connection) -> None:
+    lookups = {
+        "ems_energy_categories": [
+            "電力", "用水", "廢水", "蒸汽", "天然氣", "壓縮空氣", "氮氣",
+            "冰水", "冷卻水", "煤", "生質燃料", "產量", "環境指標", "其他",
+        ],
+        "ems_measurement_types": [
+            "瞬時流量", "累積流量", "功率", "累積能源", "壓力", "溫度",
+            "露點", "液位", "導電度", "COD", "電流", "電壓", "運轉狀態",
+            "產量", "其他",
+        ],
+        "ems_units": [
+            "m³/h", "m³", "Nm³/h", "Nm³", "bar", "kPa", "°C", "kW", "kWh",
+            "A", "V", "mg/L", "公噸", "狀態", "%",
+        ],
+        "ems_locations": ["Utility", "POY", "DTY", "SSP", "SSP Rpet", "PSF", "WWT", "4ha"],
+    }
+    for table, names in lookups.items():
+        db.executemany(
+            f"INSERT OR IGNORE INTO {table} (name, display_order) VALUES (?, ?)",
+            [(name, index) for index, name in enumerate(names, start=1)],
+        )
+
+
+def _point_metadata_checksum(point: dict) -> str:
+    fields = {
+        "external_id": point.get("external_id"),
+        "data_source_id": point.get("data_source_id"),
+        "point_name": point.get("point_name") or "",
+        "json_path": point.get("json_path") or "",
+        "description": point.get("description") or "",
+        "source_is_active": bool(point.get("source_is_active")),
+        "point_type": point.get("point_type") or "",
+        "fetch_interval_minutes": point.get("fetch_interval_minutes"),
+    }
+    raw = json.dumps(fields, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def load_bundled_point_catalog() -> tuple[dict, dict] | None:
+    if not POINT_SEED_PATH.exists() or not POINT_MANIFEST_PATH.exists():
+        return None
+
+    seed_bytes = POINT_SEED_PATH.read_bytes()
+    manifest = json.loads(POINT_MANIFEST_PATH.read_text(encoding="utf-8"))
+    actual_checksum = hashlib.sha256(seed_bytes).hexdigest()
+    if manifest.get("sha256") != actual_checksum:
+        raise ValueError("點位種子資料 checksum 不符")
+
+    catalog = json.loads(seed_bytes.decode("utf-8"))
+    points = catalog.get("points")
+    source = catalog.get("source")
+    if not isinstance(points, list) or not isinstance(source, dict):
+        raise ValueError("點位種子資料格式不正確")
+    if manifest.get("row_count") != len(points):
+        raise ValueError("點位種子資料筆數與 manifest 不符")
+    if manifest.get("data_source_id") != source.get("external_id"):
+        raise ValueError("點位種子資料來源與 manifest 不符")
+
+    external_ids = [point.get("external_id") for point in points]
+    if any(not isinstance(value, int) for value in external_ids):
+        raise ValueError("點位種子資料包含無效的外部 Id")
+    if len(external_ids) != len(set(external_ids)):
+        raise ValueError("點位種子資料包含重複的外部 Id")
+    if any(point.get("data_source_id") != source.get("external_id") for point in points):
+        raise ValueError("點位種子資料包含錯誤的 DataSourceId")
+    return catalog, manifest
+
+
+def sync_bundled_device_points(db: sqlite3.Connection) -> dict | None:
+    try:
+        loaded = load_bundled_point_catalog()
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        app.logger.exception("Cannot load bundled point catalog: %s", exc)
+        return {"status": "failed", "details": str(exc)}
+    if loaded is None:
+        return None
+
+    catalog, manifest = loaded
+    source = catalog["source"]
+    points = catalog["points"]
+    data_source_id = int(source["external_id"])
+    checksum = manifest["sha256"]
+    latest = db.execute(
+        """
+        SELECT * FROM point_catalog_versions
+        WHERE data_source_id = ? AND status = 'success'
+        ORDER BY id DESC LIMIT 1
+        """,
+        (data_source_id,),
+    ).fetchone()
+    if latest and latest["checksum"] == checksum:
+        return {"status": "current", "version": latest["version"], "record_count": latest["record_count"]}
+
+    try:
+        db.execute("BEGIN IMMEDIATE")
+        latest = db.execute(
+            """
+            SELECT * FROM point_catalog_versions
+            WHERE data_source_id = ? AND status = 'success'
+            ORDER BY id DESC LIMIT 1
+            """,
+            (data_source_id,),
+        ).fetchone()
+        if latest and latest["checksum"] == checksum:
+            db.commit()
+            return {"status": "current", "version": latest["version"], "record_count": latest["record_count"]}
+
+        db.execute(
+            """
+            INSERT INTO device_sources (
+                external_id, name, api_url, source_is_active, last_synced_at
+            ) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+            ON CONFLICT(external_id) DO UPDATE SET
+                name = excluded.name,
+                api_url = COALESCE(excluded.api_url, device_sources.api_url),
+                source_is_active = excluded.source_is_active,
+                last_synced_at = CURRENT_TIMESTAMP
+            """,
+            (
+                data_source_id,
+                source.get("name") or f"DataSource {data_source_id}",
+                source.get("api_url"),
+                bool(source.get("source_is_active", True)),
+            ),
+        )
+        existing = {
+            row["external_id"]: row
+            for row in db.execute(
+                "SELECT * FROM device_data_points WHERE data_source_id = ?",
+                (data_source_id,),
+            ).fetchall()
+        }
+        db.execute(
+            "UPDATE device_data_points SET source_present = 0 WHERE data_source_id = ?",
+            (data_source_id,),
+        )
+        added_count = 0
+        updated_count = 0
+        for point in points:
+            external_id = int(point["external_id"])
+            point_checksum = _point_metadata_checksum(point)
+            old = existing.get(external_id)
+            if old is None:
+                added_count += 1
+            elif old["source_checksum"] != point_checksum or not old["source_present"]:
+                updated_count += 1
+            db.execute(
+                """
+                INSERT INTO device_data_points (
+                    external_id, data_source_id, point_name, json_path, description,
+                    source_is_active, point_type, fetch_interval_minutes,
+                    source_present, source_checksum, last_synced_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?, CURRENT_TIMESTAMP)
+                ON CONFLICT(data_source_id, external_id) DO UPDATE SET
+                    point_name = excluded.point_name,
+                    json_path = excluded.json_path,
+                    description = excluded.description,
+                    source_is_active = excluded.source_is_active,
+                    point_type = excluded.point_type,
+                    fetch_interval_minutes = excluded.fetch_interval_minutes,
+                    source_present = 1,
+                    source_checksum = excluded.source_checksum,
+                    last_synced_at = CURRENT_TIMESTAMP
+                """,
+                (
+                    external_id,
+                    data_source_id,
+                    point.get("point_name"),
+                    point.get("json_path"),
+                    point.get("description"),
+                    bool(point.get("source_is_active", True)),
+                    point.get("point_type"),
+                    point.get("fetch_interval_minutes"),
+                    point_checksum,
+                ),
+            )
+            local_point_id = db.execute(
+                "SELECT id FROM device_data_points WHERE data_source_id = ? AND external_id = ?",
+                (data_source_id, external_id),
+            ).fetchone()["id"]
+            db.execute(
+                "INSERT OR IGNORE INTO ems_point_configs (point_id, monitor_enabled) VALUES (?, 1)",
+                (local_point_id,),
+            )
+
+        missing_count = db.execute(
+            "SELECT COUNT(*) FROM device_data_points WHERE data_source_id = ? AND source_present = 0",
+            (data_source_id,),
+        ).fetchone()[0]
+        details = f"Added {added_count}, updated {updated_count}, missing {missing_count}"
+        db.execute(
+            """
+            INSERT INTO point_catalog_versions (
+                data_source_id, version, checksum, record_count,
+                added_count, updated_count, missing_count, status, details
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, 'success', ?)
+            """,
+            (
+                data_source_id,
+                manifest["version"],
+                checksum,
+                len(points),
+                added_count,
+                updated_count,
+                missing_count,
+                details,
+            ),
+        )
+        db.execute(
+            """
+            INSERT INTO audit_logs (username, action, details)
+            VALUES ('system', 'sync_device_points', ?)
+            """,
+            (f"Point catalog {manifest['version']}: {details}",),
+        )
+        db.commit()
+        return {
+            "status": "updated",
+            "version": manifest["version"],
+            "record_count": len(points),
+            "added_count": added_count,
+            "updated_count": updated_count,
+            "missing_count": missing_count,
+        }
+    except Exception as exc:
+        db.rollback()
+        app.logger.exception("Cannot synchronize bundled point catalog: %s", exc)
+        try:
+            db.execute(
+                """
+                INSERT INTO point_catalog_versions (
+                    data_source_id, version, checksum, record_count, status, details
+                ) VALUES (?, ?, ?, ?, 'failed', ?)
+                """,
+                (data_source_id, manifest.get("version", "unknown"), checksum, len(points), str(exc)[:1000]),
+            )
+            db.commit()
+        except sqlite3.Error:
+            db.rollback()
+        return {"status": "failed", "details": str(exc)}
+
+
 @app.before_request
 def before_request() -> None:
-    init_db()
+    global _INITIALIZED_DB_PATH
+    resolved_db_path = DB_PATH.resolve()
+    if _INITIALIZED_DB_PATH == resolved_db_path:
+        return
+    with _DB_INIT_LOCK:
+        if _INITIALIZED_DB_PATH != resolved_db_path:
+            init_db()
+            _INITIALIZED_DB_PATH = resolved_db_path
 
 
 def current_user() -> sqlite3.Row | None:
@@ -1041,6 +1421,469 @@ def admin_control_limits():
         """
     ).fetchall()
     return render_template("admin_control_limits.html", rows=rows)
+
+
+EMS_VALUE_TYPES = {
+    "instantaneous": "瞬時值",
+    "cumulative": "累積表值",
+    "state": "狀態",
+    "calculated": "計算值",
+}
+EMS_AGGREGATION_METHODS = {
+    "average": "平均",
+    "delta": "期末減期初",
+    "sum": "加總",
+    "max": "最大值",
+    "min": "最小值",
+    "last": "最後值",
+    "duration": "運轉時間",
+    "none": "不統計",
+}
+EMS_FLOW_DIRECTIONS = ["輸入", "消耗", "生產", "輸出", "回收", "排放"]
+EMS_ALARM_SEVERITIES = {"info": "提示", "warning": "警告", "critical": "嚴重"}
+EMS_ALARM_VALUE_MODES = {
+    "raw": "原始讀值",
+    "interval_delta": "每次收集差值",
+    "change_rate": "變化率",
+}
+
+
+def ems_lookup_rows(table: str) -> list[sqlite3.Row]:
+    allowed_tables = {
+        "ems_energy_categories",
+        "ems_measurement_types",
+        "ems_units",
+        "ems_locations",
+    }
+    if table not in allowed_tables:
+        raise ValueError("Invalid EMS lookup table")
+    return get_db().execute(
+        f"SELECT id, name FROM {table} WHERE active = 1 ORDER BY display_order, id"
+    ).fetchall()
+
+
+def ems_complete_sql(alias: str = "cfg") -> str:
+    return f"""(
+        {alias}.energy_category_id IS NOT NULL
+        AND {alias}.measurement_type_id IS NOT NULL
+        AND {alias}.unit_id IS NOT NULL
+        AND {alias}.location_id IS NOT NULL
+        AND COALESCE({alias}.value_type, '') <> ''
+        AND COALESCE({alias}.aggregation_method, '') <> ''
+    )"""
+
+
+def ems_issue_sql(point_alias: str = "dp") -> str:
+    return f"""(
+        {point_alias}.source_present = 0
+        OR TRIM(COALESCE({point_alias}.point_name, '')) = ''
+        OR TRIM(COALESCE({point_alias}.json_path, '')) = ''
+        OR (
+            TRIM(COALESCE({point_alias}.point_name, '')) <> ''
+            AND (SELECT COUNT(*) FROM device_data_points duplicate
+                 WHERE duplicate.data_source_id = {point_alias}.data_source_id
+                   AND duplicate.point_name = {point_alias}.point_name) > 1
+        )
+    )"""
+
+
+def ems_point_filters() -> tuple[list[str], list, dict]:
+    query = request.args.get("q", "").strip()
+    monitor = request.args.get("monitor", "all")
+    category_id = request.args.get("category_id", "").strip()
+    location_id = request.args.get("location_id", "").strip()
+    status = request.args.get("status", "all")
+    filters = ["dp.data_source_id = ?"]
+    params: list = [1]
+    if query:
+        filters.append(
+            "(dp.point_name LIKE ? OR dp.json_path LIKE ? OR dp.description LIKE ? OR cfg.display_name LIKE ?)"
+        )
+        keyword = f"%{query}%"
+        params.extend([keyword, keyword, keyword, keyword])
+    if monitor == "on":
+        filters.append("cfg.monitor_enabled = 1")
+    elif monitor == "off":
+        filters.append("cfg.monitor_enabled = 0")
+    if category_id.isdigit():
+        filters.append("cfg.energy_category_id = ?")
+        params.append(int(category_id))
+    if location_id.isdigit():
+        filters.append("cfg.location_id = ?")
+        params.append(int(location_id))
+    if status == "complete":
+        filters.append(ems_complete_sql())
+    elif status == "incomplete":
+        filters.append(f"NOT {ems_complete_sql()}")
+    elif status == "issue":
+        filters.append(ems_issue_sql())
+    elif status == "no_limit":
+        filters.append("cfg.lower_limit IS NULL AND cfg.upper_limit IS NULL")
+    elif status == "source_missing":
+        filters.append("dp.source_present = 0")
+    values = {
+        "q": query,
+        "monitor": monitor,
+        "category_id": category_id,
+        "location_id": location_id,
+        "status": status,
+    }
+    return filters, params, values
+
+
+def ems_point_select_sql(where_sql: str) -> str:
+    return f"""
+        SELECT
+            dp.id, dp.external_id, dp.data_source_id, dp.point_name, dp.json_path,
+            dp.description, dp.source_is_active, dp.point_type,
+            dp.fetch_interval_minutes, dp.source_present, dp.last_synced_at,
+            ds.name AS source_name,
+            cfg.monitor_enabled, cfg.lower_limit, cfg.upper_limit, cfg.display_name,
+            cfg.energy_category_id, cfg.measurement_type_id, cfg.unit_id,
+            cfg.location_id, cfg.equipment_name, cfg.value_type,
+            cfg.aggregation_method, cfg.flow_direction, cfg.alarm_severity,
+            cfg.alarm_value_mode, cfg.alarm_consecutive_samples,
+            cfg.alarm_deadband, cfg.notes,
+            cfg.updated_at, updater.username AS updated_by_username,
+            category.name AS category_name,
+            measurement.name AS measurement_name,
+            unit.name AS unit_name,
+            location.name AS location_name,
+            (SELECT COUNT(*) FROM device_data_points duplicate
+             WHERE duplicate.data_source_id = dp.data_source_id
+               AND duplicate.point_name = dp.point_name
+               AND TRIM(COALESCE(dp.point_name, '')) <> '') AS duplicate_count
+        FROM device_data_points dp
+        JOIN device_sources ds ON ds.external_id = dp.data_source_id
+        JOIN ems_point_configs cfg ON cfg.point_id = dp.id
+        LEFT JOIN ems_energy_categories category ON category.id = cfg.energy_category_id
+        LEFT JOIN ems_measurement_types measurement ON measurement.id = cfg.measurement_type_id
+        LEFT JOIN ems_units unit ON unit.id = cfg.unit_id
+        LEFT JOIN ems_locations location ON location.id = cfg.location_id
+        LEFT JOIN users updater ON updater.id = cfg.updated_by
+        WHERE {where_sql}
+    """
+
+
+@app.route("/admin/ems-points", methods=["GET"])
+def admin_ems_points():
+    guard = admin_required()
+    if guard:
+        return guard
+
+    db = get_db()
+    filters, params, filter_values = ems_point_filters()
+    where_sql = " AND ".join(filters)
+    try:
+        page = max(int(request.args.get("page", "1")), 1)
+    except ValueError:
+        page = 1
+    try:
+        per_page = int(request.args.get("per_page", "50"))
+    except ValueError:
+        per_page = 50
+    if per_page not in {25, 50, 100}:
+        per_page = 50
+    total_rows = db.execute(
+        f"SELECT COUNT(*) FROM ({ems_point_select_sql(where_sql)}) filtered",
+        params,
+    ).fetchone()[0]
+    total_pages = max(math.ceil(total_rows / per_page), 1)
+    page = min(page, total_pages)
+    point_rows = db.execute(
+        ems_point_select_sql(where_sql)
+        + " ORDER BY dp.source_present DESC, dp.external_id LIMIT ? OFFSET ?",
+        [*params, per_page, (page - 1) * per_page],
+    ).fetchall()
+
+    complete_expression = ems_complete_sql()
+    issue_expression = ems_issue_sql()
+    stats = db.execute(
+        f"""
+        SELECT
+            COUNT(*) AS total,
+            SUM(CASE WHEN cfg.monitor_enabled = 1 THEN 1 ELSE 0 END) AS monitored,
+            SUM(CASE WHEN cfg.lower_limit IS NOT NULL OR cfg.upper_limit IS NOT NULL THEN 1 ELSE 0 END) AS with_limits,
+            SUM(CASE WHEN NOT {complete_expression} THEN 1 ELSE 0 END) AS incomplete,
+            SUM(CASE WHEN {issue_expression} THEN 1 ELSE 0 END) AS issues
+        FROM device_data_points dp
+        JOIN ems_point_configs cfg ON cfg.point_id = dp.id
+        WHERE dp.data_source_id = 1
+        """
+    ).fetchone()
+    catalog_version = db.execute(
+        """
+        SELECT * FROM point_catalog_versions
+        WHERE data_source_id = 1
+        ORDER BY id DESC LIMIT 1
+        """
+    ).fetchone()
+    return render_template(
+        "admin_ems_points.html",
+        points=point_rows,
+        point_payloads=[dict(row) for row in point_rows],
+        stats=stats,
+        filters=filter_values,
+        categories=ems_lookup_rows("ems_energy_categories"),
+        measurement_types=ems_lookup_rows("ems_measurement_types"),
+        units=ems_lookup_rows("ems_units"),
+        locations=ems_lookup_rows("ems_locations"),
+        value_types=EMS_VALUE_TYPES,
+        aggregation_methods=EMS_AGGREGATION_METHODS,
+        flow_directions=EMS_FLOW_DIRECTIONS,
+        alarm_severities=EMS_ALARM_SEVERITIES,
+        alarm_value_modes=EMS_ALARM_VALUE_MODES,
+        catalog_version=catalog_version,
+        page=page,
+        per_page=per_page,
+        total_rows=total_rows,
+        total_pages=total_pages,
+    )
+
+
+def optional_finite_float(field: str, label: str) -> float | None:
+    raw = request.form.get(field, "").strip()
+    if not raw:
+        return None
+    try:
+        value = float(raw)
+    except ValueError as exc:
+        raise ValueError(f"{label}必須是有效數字。") from exc
+    if not math.isfinite(value):
+        raise ValueError(f"{label}必須是有限數字。")
+    return value
+
+
+def optional_lookup_id(db: sqlite3.Connection, field: str, table: str, label: str) -> int | None:
+    raw = request.form.get(field, "").strip()
+    if not raw:
+        return None
+    if not raw.isdigit():
+        raise ValueError(f"{label}選項不正確。")
+    lookup_id = int(raw)
+    if db.execute(f"SELECT 1 FROM {table} WHERE id = ? AND active = 1", (lookup_id,)).fetchone() is None:
+        raise ValueError(f"{label}選項不存在。")
+    return lookup_id
+
+
+def safe_return_url(default_endpoint: str = "admin_ems_points") -> str:
+    return_url = request.form.get("return_to", "").strip()
+    if not return_url.startswith("/") or return_url.startswith("//"):
+        return url_for(default_endpoint)
+    return return_url
+
+
+@app.route("/admin/ems-points/<int:point_id>", methods=["POST"])
+def update_ems_point(point_id: int):
+    guard = admin_required()
+    if guard:
+        return guard
+
+    db = get_db()
+    point = db.execute(
+        """
+        SELECT dp.*, cfg.id AS config_id
+        FROM device_data_points dp
+        JOIN ems_point_configs cfg ON cfg.point_id = dp.id
+        WHERE dp.id = ? AND dp.data_source_id = 1
+        """,
+        (point_id,),
+    ).fetchone()
+    if point is None:
+        flash("找不到指定的 EMS 點位。", "danger")
+        return redirect(safe_return_url())
+
+    try:
+        lower_limit = optional_finite_float("lower_limit", "下限")
+        upper_limit = optional_finite_float("upper_limit", "上限")
+        deadband = optional_finite_float("alarm_deadband", "告警緩衝值")
+        if lower_limit is not None and upper_limit is not None and lower_limit > upper_limit:
+            raise ValueError("下限不可大於上限。")
+        if deadband is not None and deadband < 0:
+            raise ValueError("告警緩衝值不可小於零。")
+        consecutive_raw = request.form.get("alarm_consecutive_samples", "1").strip()
+        consecutive_samples = int(consecutive_raw or "1")
+        if consecutive_samples < 1 or consecutive_samples > 168:
+            raise ValueError("連續異常次數必須介於 1 到 168 次。")
+        category_id = optional_lookup_id(db, "energy_category_id", "ems_energy_categories", "能源類別")
+        measurement_type_id = optional_lookup_id(db, "measurement_type_id", "ems_measurement_types", "測量類型")
+        unit_id = optional_lookup_id(db, "unit_id", "ems_units", "工程單位")
+        location_id = optional_lookup_id(db, "location_id", "ems_locations", "區域")
+        value_type = request.form.get("value_type", "").strip() or None
+        aggregation_method = request.form.get("aggregation_method", "").strip() or None
+        flow_direction = request.form.get("flow_direction", "").strip() or None
+        severity = request.form.get("alarm_severity", "warning").strip()
+        alarm_value_mode = request.form.get("alarm_value_mode", "raw").strip()
+        if value_type is not None and value_type not in EMS_VALUE_TYPES:
+            raise ValueError("數值性質選項不正確。")
+        if aggregation_method is not None and aggregation_method not in EMS_AGGREGATION_METHODS:
+            raise ValueError("統計方式選項不正確。")
+        if flow_direction is not None and flow_direction not in EMS_FLOW_DIRECTIONS:
+            raise ValueError("流向選項不正確。")
+        if severity not in EMS_ALARM_SEVERITIES:
+            raise ValueError("告警等級選項不正確。")
+        if alarm_value_mode not in EMS_ALARM_VALUE_MODES:
+            raise ValueError("告警判斷值選項不正確。")
+    except (ValueError, OverflowError) as exc:
+        flash(str(exc), "danger")
+        return redirect(safe_return_url())
+
+    db.execute(
+        """
+        UPDATE ems_point_configs
+        SET monitor_enabled = ?, lower_limit = ?, upper_limit = ?, display_name = ?,
+            energy_category_id = ?, measurement_type_id = ?, unit_id = ?, location_id = ?,
+            equipment_name = ?, value_type = ?, aggregation_method = ?, flow_direction = ?,
+            alarm_severity = ?, alarm_value_mode = ?, alarm_consecutive_samples = ?,
+            alarm_deadband = ?, notes = ?,
+            updated_by = ?, updated_at = CURRENT_TIMESTAMP
+        WHERE point_id = ?
+        """,
+        (
+            "monitor_enabled" in request.form,
+            lower_limit,
+            upper_limit,
+            request.form.get("display_name", "").strip() or None,
+            category_id,
+            measurement_type_id,
+            unit_id,
+            location_id,
+            request.form.get("equipment_name", "").strip() or None,
+            value_type,
+            aggregation_method,
+            flow_direction,
+            severity,
+            alarm_value_mode,
+            consecutive_samples,
+            deadband or 0,
+            request.form.get("notes", "").strip() or None,
+            session["user_id"],
+            point_id,
+        ),
+    )
+    db.commit()
+    log_action(
+        "update_ems_point",
+        f"Updated EMS point {point['external_id']} ({point['point_name'] or 'blank PointName'})",
+    )
+    flash(f"點位 {point['external_id']} 的 EMS 設定已儲存。", "success")
+    return redirect(safe_return_url())
+
+
+@app.route("/admin/ems-points/bulk", methods=["POST"])
+def bulk_update_ems_points():
+    guard = admin_required()
+    if guard:
+        return guard
+
+    selected_ids = []
+    for raw_id in request.form.getlist("point_ids")[:500]:
+        if raw_id.isdigit():
+            selected_ids.append(int(raw_id))
+    selected_ids = sorted(set(selected_ids))
+    if not selected_ids:
+        flash("請先選擇至少一個點位。", "warning")
+        return redirect(safe_return_url())
+
+    db = get_db()
+    placeholders = ",".join("?" for _ in selected_ids)
+    allowed_ids = [
+        row["id"] for row in db.execute(
+            f"SELECT id FROM device_data_points WHERE data_source_id = 1 AND id IN ({placeholders})",
+            selected_ids,
+        ).fetchall()
+    ]
+    if not allowed_ids:
+        flash("選取的點位不存在。", "danger")
+        return redirect(safe_return_url())
+    placeholders = ",".join("?" for _ in allowed_ids)
+    action = request.form.get("action", "")
+    if action in {"monitor_on", "monitor_off"}:
+        monitor_enabled = action == "monitor_on"
+        db.execute(
+            f"""
+            UPDATE ems_point_configs
+            SET monitor_enabled = ?, updated_by = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE point_id IN ({placeholders})
+            """,
+            [monitor_enabled, session["user_id"], *allowed_ids],
+        )
+        action_label = "啟用監控" if monitor_enabled else "停止監控"
+    elif action == "set_category":
+        try:
+            category_id = optional_lookup_id(db, "bulk_category_id", "ems_energy_categories", "能源類別")
+        except ValueError as exc:
+            flash(str(exc), "danger")
+            return redirect(safe_return_url())
+        if category_id is None:
+            flash("請選擇要套用的能源類別。", "warning")
+            return redirect(safe_return_url())
+        db.execute(
+            f"""
+            UPDATE ems_point_configs
+            SET energy_category_id = ?, updated_by = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE point_id IN ({placeholders})
+            """,
+            [category_id, session["user_id"], *allowed_ids],
+        )
+        action_label = "設定能源類別"
+    else:
+        flash("批次操作不正確。", "danger")
+        return redirect(safe_return_url())
+    db.commit()
+    log_action("bulk_update_ems_points", f"{action_label}: {len(allowed_ids)} points")
+    flash(f"已為 {len(allowed_ids)} 個點位完成「{action_label}」。", "success")
+    return redirect(safe_return_url())
+
+
+@app.route("/admin/ems-points/export", methods=["GET"])
+def export_ems_points():
+    guard = admin_required()
+    if guard:
+        return guard
+
+    rows = get_db().execute(
+        ems_point_select_sql("dp.data_source_id = ?") + " ORDER BY dp.external_id",
+        (1,),
+    ).fetchall()
+    workbook = Workbook()
+    sheet = workbook.active
+    sheet.title = "EMS Point Config"
+    sheet.append([
+        "DataSourceId", "ExternalPointId", "PointName", "JsonPath", "Description",
+        "SourcePresent", "MonitorEnabled", "LowerLimit", "UpperLimit", "DisplayName",
+        "EnergyCategory", "MeasurementType", "Unit", "Location", "Equipment",
+        "ValueType", "AggregationMethod", "FlowDirection", "AlarmSeverity",
+        "AlarmValueMode", "AlarmConsecutiveSamples", "AlarmDeadband", "Notes",
+        "UpdatedBy", "UpdatedAt",
+    ])
+    for row in rows:
+        sheet.append([
+            row["data_source_id"], row["external_id"], row["point_name"], row["json_path"],
+            row["description"], bool(row["source_present"]), bool(row["monitor_enabled"]),
+            row["lower_limit"], row["upper_limit"], row["display_name"], row["category_name"],
+            row["measurement_name"], row["unit_name"], row["location_name"],
+            row["equipment_name"], row["value_type"], row["aggregation_method"],
+            row["flow_direction"], row["alarm_severity"], row["alarm_value_mode"],
+            row["alarm_consecutive_samples"], row["alarm_deadband"], row["notes"],
+            row["updated_by_username"], row["updated_at"],
+        ])
+    sheet.freeze_panes = "A2"
+    sheet.auto_filter.ref = sheet.dimensions
+    for column in sheet.columns:
+        sheet.column_dimensions[column[0].column_letter].width = min(
+            max(len(str(cell.value or "")) for cell in column) + 2,
+            42,
+        )
+    output = BytesIO()
+    workbook.save(output)
+    output.seek(0)
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name=f"ems-point-config-{date.today().isoformat()}.xlsx",
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
 
 
 @app.route("/fill", methods=["GET", "POST"])

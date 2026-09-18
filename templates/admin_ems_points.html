@@ -1,0 +1,408 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .ems-notice { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+    .ems-version { white-space: nowrap; text-align: right; }
+    .ems-kpis { display: grid; grid-template-columns: repeat(5, minmax(130px, 1fr)); gap: 10px; margin-bottom: 10px; }
+    .ems-kpi { padding: 9px 10px; border: 2px solid; border-color: var(--highlight) var(--shadow) var(--shadow) var(--highlight); }
+    .ems-kpi.primary { color: #fff; background: var(--primary); }
+    .ems-kpi.warning { background: #fff2bf; }
+    .ems-kpi.danger { background: #fbe3e3; }
+    .ems-kpi strong { display: block; margin: 5px 0 2px; font-size: 22px; }
+    .ems-kpi small { color: inherit; opacity: .8; }
+    .ems-filters { display: grid; grid-template-columns: minmax(230px, 1.7fr) repeat(4, minmax(130px, 1fr)) auto; gap: 9px; align-items: end; }
+    .ems-bulk { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; padding: 7px 9px; background: #e7e7e7; border: 1px solid var(--border); }
+    .ems-bulk strong { margin-right: auto; }
+    .ems-bulk select { width: 180px; min-height: 32px; }
+    .ems-table-shell { max-height: 610px; overflow: auto; border: 2px solid; border-color: var(--shadow) var(--highlight) var(--highlight) var(--shadow); background: #fff; }
+    .ems-table { min-width: 1350px; border: 0; }
+    .ems-table th { position: sticky; top: 0; z-index: 2; white-space: nowrap; }
+    .ems-table tbody tr:hover td { background: #e7f3ff; }
+    .ems-table tr.issue-row td:first-child { box-shadow: inset 4px 0 #b54708; }
+    .ems-table tr.source-missing td { opacity: .65; }
+    .ems-check { width: 34px; text-align: center; }
+    .ems-check input { width: auto; min-height: auto; }
+    .ems-id { width: 64px; font-variant-numeric: tabular-nums; }
+    .ems-code { min-width: 190px; max-width: 250px; font-family: Consolas, monospace; font-size: 12px; overflow-wrap: anywhere; }
+    .ems-description { min-width: 150px; max-width: 230px; }
+    .ems-empty { color: #9b2c2c; font-style: italic; }
+    .ems-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; border: 1px solid #777; background: #eee; font-size: 11px; font-weight: 700; white-space: nowrap; }
+    .ems-badge::before { content: ""; width: 6px; height: 6px; background: currentColor; }
+    .ems-badge.success { color: #075f2c; background: #e1f5e8; border-color: #65a87d; }
+    .ems-badge.warning { color: #8a5300; background: #fff2bf; border-color: #c69230; }
+    .ems-badge.danger { color: #8b1e1e; background: #fbe3e3; border-color: #c97a7a; }
+    .ems-badge.info { color: #004878; background: #e9f4ff; border-color: #76a9cf; }
+    .ems-footer { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 10px; }
+    .ems-pager { display: flex; align-items: center; gap: 5px; }
+    .ems-pager .current { background: var(--primary); color: #fff; }
+    .ems-dialog { width: min(900px, calc(100vw - 24px)); max-height: calc(100vh - 30px); padding: 0; border: 2px solid; border-color: var(--highlight) var(--shadow) var(--shadow) var(--highlight); background: var(--panel); color: #000; box-shadow: 5px 5px 0 rgba(0,0,0,.45); }
+    .ems-dialog::backdrop { background: rgba(0,0,0,.55); }
+    .ems-dialog-title { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; background: linear-gradient(90deg, #000080, #1084d0); color: #fff; font-weight: 700; }
+    .ems-dialog-title button { min-height: 25px; width: 28px; padding: 0; }
+    .ems-dialog-body { max-height: calc(100vh - 125px); overflow: auto; padding: 12px; }
+    .ems-source-card { margin-bottom: 12px; padding: 9px; background: #efefef; border: 1px solid var(--border); }
+    .ems-source-grid { display: grid; grid-template-columns: 90px minmax(180px,1fr) minmax(180px,1fr); gap: 8px 12px; }
+    .ems-source-grid code { overflow-wrap: anywhere; font-size: 12px; }
+    .ems-form-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 11px; }
+    .ems-span-2 { grid-column: span 2; }
+    .ems-span-3 { grid-column: 1 / -1; }
+    .ems-monitor-box { display: flex; align-items: center; gap: 8px; min-height: 38px; padding: 7px 9px; background: #fff; border: 2px solid; border-color: var(--shadow) var(--highlight) var(--highlight) var(--shadow); }
+    .ems-monitor-box input { width: auto; min-height: auto; }
+    .ems-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; padding: 9px 12px; border-top: 1px solid var(--border); }
+    .ems-validation { display: none; margin-bottom: 10px; padding: 8px; color: #8b1e1e; background: #fbe3e3; border: 1px solid #c97a7a; }
+    @media (max-width: 1050px) {
+        .ems-kpis { grid-template-columns: repeat(3, 1fr); }
+        .ems-filters { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 720px) {
+        .ems-kpis, .ems-filters { grid-template-columns: 1fr 1fr; }
+        .ems-filters .search-field { grid-column: 1 / -1; }
+        .ems-notice, .ems-footer { align-items: stretch; flex-direction: column; }
+        .ems-version { text-align: left; }
+        .ems-form-grid, .ems-source-grid { grid-template-columns: 1fr; }
+        .ems-span-2, .ems-span-3 { grid-column: auto; }
+    }
+</style>
+
+<h1>EMS 公用點位設定</h1>
+
+<section class="panel ems-notice">
+    <div>
+        <strong>UtilityDepartment（DataSourceId = 1）</strong>
+        <p class="muted">來源點位會在部署後自動比對版本；管理員填寫的上下限與 EMS 分類不會被來源同步覆蓋。</p>
+    </div>
+    <div class="ems-version">
+        {% if catalog_version %}
+            <strong>點位版本 {{ catalog_version.version }}</strong><br>
+            <span class="muted">{{ catalog_version.record_count }} 筆・{{ catalog_version.status }}・{{ catalog_version.imported_at }}</span>
+        {% else %}
+            <span class="ems-badge danger">尚未匯入點位版本</span>
+        {% endif %}
+    </div>
+</section>
+
+<section class="ems-kpis" aria-label="點位摘要">
+    <div class="ems-kpi primary"><span>公用點位</span><strong>{{ stats.total or 0 }}</strong><small>本地 SQLite 點位快照</small></div>
+    <div class="ems-kpi"><span>啟用監控</span><strong>{{ stats.monitored or 0 }}</strong><small>新點位預設啟用</small></div>
+    <div class="ems-kpi"><span>已設定門檻</span><strong>{{ stats.with_limits or 0 }}</strong><small>至少設定上限或下限</small></div>
+    <div class="ems-kpi warning"><span>尚未完成分類</span><strong>{{ stats.incomplete or 0 }}</strong><small>等待管理員補充資料</small></div>
+    <div class="ems-kpi danger"><span>來源資料問題</span><strong>{{ stats.issues or 0 }}</strong><small>缺值、重複或來源失效</small></div>
+</section>
+
+<section class="panel">
+    <h2>搜尋與篩選</h2>
+    <form method="get" class="ems-filters">
+        <div class="search-field">
+            <label for="q">搜尋點位</label>
+            <input id="q" name="q" type="search" value="{{ filters.q }}" placeholder="PointName、JsonPath、Description、顯示名稱">
+        </div>
+        <div>
+            <label for="monitor">監控狀態</label>
+            <select id="monitor" name="monitor">
+                <option value="all" {% if filters.monitor == 'all' %}selected{% endif %}>全部</option>
+                <option value="on" {% if filters.monitor == 'on' %}selected{% endif %}>監控中</option>
+                <option value="off" {% if filters.monitor == 'off' %}selected{% endif %}>不監控</option>
+            </select>
+        </div>
+        <div>
+            <label for="category_id">能源類別</label>
+            <select id="category_id" name="category_id">
+                <option value="">全部類別</option>
+                {% for item in categories %}<option value="{{ item.id }}" {% if filters.category_id == item.id|string %}selected{% endif %}>{{ item.name }}</option>{% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="status">資料狀態</label>
+            <select id="status" name="status">
+                <option value="all" {% if filters.status == 'all' %}selected{% endif %}>全部狀態</option>
+                <option value="complete" {% if filters.status == 'complete' %}selected{% endif %}>分類完成</option>
+                <option value="incomplete" {% if filters.status == 'incomplete' %}selected{% endif %}>尚未分類</option>
+                <option value="issue" {% if filters.status == 'issue' %}selected{% endif %}>來源有問題</option>
+                <option value="no_limit" {% if filters.status == 'no_limit' %}selected{% endif %}>尚未設定門檻</option>
+                <option value="source_missing" {% if filters.status == 'source_missing' %}selected{% endif %}>來源已不存在</option>
+            </select>
+        </div>
+        <div>
+            <label for="location_id">區域</label>
+            <select id="location_id" name="location_id">
+                <option value="">全部區域</option>
+                {% for item in locations %}<option value="{{ item.id }}" {% if filters.location_id == item.id|string %}selected{% endif %}>{{ item.name }}</option>{% endfor %}
+            </select>
+        </div>
+        <input type="hidden" name="per_page" value="{{ per_page }}">
+        <div style="display:flex; gap:6px;">
+            <button type="submit">查詢</button>
+            <a class="button secondary" href="{{ url_for('admin_ems_points') }}" style="text-decoration:none;">清除</a>
+        </div>
+    </form>
+</section>
+
+<section class="panel">
+    <form id="bulk-form" method="post" action="{{ url_for('bulk_update_ems_points') }}">
+        <input type="hidden" name="return_to" value="{{ request.full_path }}">
+        <div class="ems-bulk">
+            <strong><span id="selected-count">0</span> 筆已選取</strong>
+            <select name="bulk_category_id" aria-label="批次能源類別">
+                <option value="">批次設定能源類別…</option>
+                {% for item in categories %}<option value="{{ item.id }}">{{ item.name }}</option>{% endfor %}
+            </select>
+            <button type="submit" name="action" value="set_category">套用類別</button>
+            <button type="submit" name="action" value="monitor_on">啟用監控</button>
+            <button type="submit" name="action" value="monitor_off">停止監控</button>
+            <a class="button secondary" href="{{ url_for('export_ems_points') }}" style="text-decoration:none;">匯出 Excel</a>
+        </div>
+    </form>
+
+    <div class="ems-table-shell">
+        <table class="ems-table">
+            <thead>
+                <tr>
+                    <th class="ems-check"><input id="select-all" type="checkbox" aria-label="全選本頁"></th>
+                    <th>外部 Id</th>
+                    <th>PointName</th>
+                    <th>JsonPath</th>
+                    <th>Description</th>
+                    <th>監控</th>
+                    <th>下限</th>
+                    <th>上限</th>
+                    <th>能源類別</th>
+                    <th>測量類型</th>
+                    <th>單位</th>
+                    <th>區域</th>
+                    <th>狀態</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for point in points %}
+                    {% set complete = point.energy_category_id and point.measurement_type_id and point.unit_id and point.location_id and point.value_type and point.aggregation_method %}
+                    {% set issue = not point.source_present or not point.point_name or not point.json_path or point.duplicate_count > 1 %}
+                    <tr class="{% if issue %}issue-row{% endif %} {% if not point.source_present %}source-missing{% endif %}">
+                        <td class="ems-check"><input class="point-select" type="checkbox" name="point_ids" value="{{ point.id }}" form="bulk-form" aria-label="選取點位 {{ point.external_id }}"></td>
+                        <td class="ems-id">{{ point.external_id }}</td>
+                        <td class="ems-code">{% if point.point_name %}{{ point.point_name }}{% else %}<span class="ems-empty">（空白）</span>{% endif %}</td>
+                        <td class="ems-code">{% if point.json_path %}{{ point.json_path }}{% else %}<span class="ems-empty">（空白）</span>{% endif %}</td>
+                        <td class="ems-description">{{ point.description or '—' }}</td>
+                        <td>{% if point.monitor_enabled %}<span class="ems-badge success">監控中</span>{% else %}<span class="ems-badge">不監控</span>{% endif %}</td>
+                        <td>{{ point.lower_limit if point.lower_limit is not none else '—' }}</td>
+                        <td>{{ point.upper_limit if point.upper_limit is not none else '—' }}</td>
+                        <td>{{ point.category_name or '未分類' }}</td>
+                        <td>{{ point.measurement_name or '未分類' }}</td>
+                        <td>{{ point.unit_name or '—' }}</td>
+                        <td>{{ point.location_name or '—' }}</td>
+                        <td>
+                            {% if not point.source_present %}
+                                <span class="ems-badge danger">來源已不存在</span>
+                            {% elif issue %}
+                                <span class="ems-badge danger">來源待確認</span>
+                            {% elif not complete %}
+                                <span class="ems-badge warning">尚未分類</span>
+                            {% elif point.lower_limit is none and point.upper_limit is none %}
+                                <span class="ems-badge info">缺少門檻</span>
+                            {% else %}
+                                <span class="ems-badge success">設定完成</span>
+                            {% endif %}
+                        </td>
+                        <td><button class="edit-point" type="button" data-point-id="{{ point.id }}">編輯</button></td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="14" class="empty-state">目前篩選條件沒有符合的點位。</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="ems-footer">
+        <span class="muted">
+            {% if total_rows %}顯示第 {{ (page - 1) * per_page + 1 }}～{{ [page * per_page, total_rows]|min }} 筆，共 {{ total_rows }} 筆{% else %}共 0 筆{% endif %}
+        </span>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <form method="get">
+                {% for key, value in filters.items() %}{% if value and value != 'all' %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endif %}{% endfor %}
+                <label for="per-page" style="display:inline;">每頁</label>
+                <select id="per-page" name="per_page" onchange="this.form.submit()" style="width:auto; min-height:30px; padding:3px 24px 3px 6px;">
+                    {% for size in (25, 50, 100) %}<option value="{{ size }}" {% if per_page == size %}selected{% endif %}>{{ size }}</option>{% endfor %}
+                </select>
+            </form>
+            <div class="ems-pager">
+                {% if page > 1 %}<a class="button secondary" href="{{ url_for('admin_ems_points', q=filters.q, monitor=filters.monitor, category_id=filters.category_id, location_id=filters.location_id, status=filters.status, per_page=per_page, page=page-1) }}" style="text-decoration:none;">上一頁</a>{% endif %}
+                {% for page_number in range([1, page-2]|max, [total_pages, page+2]|min + 1) %}
+                    <a class="button secondary {% if page_number == page %}current{% endif %}" href="{{ url_for('admin_ems_points', q=filters.q, monitor=filters.monitor, category_id=filters.category_id, location_id=filters.location_id, status=filters.status, per_page=per_page, page=page_number) }}" style="text-decoration:none;">{{ page_number }}</a>
+                {% endfor %}
+                {% if page < total_pages %}<a class="button secondary" href="{{ url_for('admin_ems_points', q=filters.q, monitor=filters.monitor, category_id=filters.category_id, location_id=filters.location_id, status=filters.status, per_page=per_page, page=page+1) }}" style="text-decoration:none;">下一頁</a>{% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<dialog id="ems-edit-dialog" class="ems-dialog">
+    <div class="ems-dialog-title"><span>編輯 EMS 點位設定</span><button id="close-dialog" type="button" aria-label="關閉">×</button></div>
+    <form id="ems-edit-form" method="post">
+        <input type="hidden" name="return_to" value="{{ request.full_path }}">
+        <div class="ems-dialog-body">
+            <div id="ems-validation" class="ems-validation"></div>
+            <div class="ems-source-card">
+                <h2>來源點位資料（唯讀）</h2>
+                <div class="ems-source-grid">
+                    <div><strong>外部 Id</strong><br><span id="source-id"></span></div>
+                    <div><strong>PointName</strong><br><code id="source-point-name"></code></div>
+                    <div><strong>JsonPath</strong><br><code id="source-json-path"></code></div>
+                    <div><strong>資料來源</strong><br><span id="source-name"></span></div>
+                    <div class="ems-span-2"><strong>Description</strong><br><span id="source-description"></span></div>
+                </div>
+            </div>
+
+            <h2>監控與門檻</h2>
+            <div class="ems-form-grid">
+                <div>
+                    <label>是否監控</label>
+                    <label class="ems-monitor-box"><input id="field-monitor" name="monitor_enabled" type="checkbox"> 啟用此點位監控</label>
+                </div>
+                <div><label for="field-lower">下限</label><input id="field-lower" name="lower_limit" type="number" step="any" placeholder="未設定"></div>
+                <div><label for="field-upper">上限</label><input id="field-upper" name="upper_limit" type="number" step="any" placeholder="未設定"></div>
+                <div>
+                    <label for="field-severity">告警等級</label>
+                    <select id="field-severity" name="alarm_severity">{% for key, label in alarm_severities.items() %}<option value="{{ key }}">{{ label }}</option>{% endfor %}</select>
+                </div>
+                <div>
+                    <label for="field-alarm-value-mode">告警判斷值</label>
+                    <select id="field-alarm-value-mode" name="alarm_value_mode">{% for key, label in alarm_value_modes.items() %}<option value="{{ key }}">{{ label }}</option>{% endfor %}</select>
+                    <span class="muted">累積表值通常使用「每次收集差值」。</span>
+                </div>
+                <div>
+                    <label for="field-consecutive">連續異常次數</label>
+                    <input id="field-consecutive" name="alarm_consecutive_samples" type="number" min="1" max="168" step="1">
+                    <span id="consecutive-help" class="muted">連續幾次收集超限才告警。</span>
+                </div>
+                <div>
+                    <label for="field-deadband">告警解除緩衝（Deadband）</label>
+                    <input id="field-deadband" name="alarm_deadband" type="number" min="0" step="any">
+                    <span class="muted">單位與點位相同；設為 0 表示回到界限內便解除。</span>
+                </div>
+            </div>
+
+            <h2 style="margin-top:16px;">EMS 分類</h2>
+            <div class="ems-form-grid">
+                <div class="ems-span-2"><label for="field-display-name">EMS 顯示名稱</label><input id="field-display-name" name="display_name"></div>
+                <div>
+                    <label for="field-category">能源類別</label>
+                    <select id="field-category" name="energy_category_id"><option value="">尚未分類</option>{% for item in categories %}<option value="{{ item.id }}">{{ item.name }}</option>{% endfor %}</select>
+                </div>
+                <div>
+                    <label for="field-measurement">測量類型</label>
+                    <select id="field-measurement" name="measurement_type_id"><option value="">尚未分類</option>{% for item in measurement_types %}<option value="{{ item.id }}">{{ item.name }}</option>{% endfor %}</select>
+                </div>
+                <div>
+                    <label for="field-unit">工程單位</label>
+                    <select id="field-unit" name="unit_id"><option value="">尚未設定</option>{% for item in units %}<option value="{{ item.id }}">{{ item.name }}</option>{% endfor %}</select>
+                </div>
+                <div>
+                    <label for="field-location">區域</label>
+                    <select id="field-location" name="location_id"><option value="">尚未設定</option>{% for item in locations %}<option value="{{ item.id }}">{{ item.name }}</option>{% endfor %}</select>
+                </div>
+                <div><label for="field-equipment">設備／系統</label><input id="field-equipment" name="equipment_name"></div>
+                <div>
+                    <label for="field-value-type">數值性質</label>
+                    <select id="field-value-type" name="value_type"><option value="">尚未設定</option>{% for key, label in value_types.items() %}<option value="{{ key }}">{{ label }}</option>{% endfor %}</select>
+                </div>
+                <div>
+                    <label for="field-aggregation">統計方式</label>
+                    <select id="field-aggregation" name="aggregation_method"><option value="">尚未設定</option>{% for key, label in aggregation_methods.items() %}<option value="{{ key }}">{{ label }}</option>{% endfor %}</select>
+                </div>
+                <div>
+                    <label for="field-direction">流向</label>
+                    <select id="field-direction" name="flow_direction"><option value="">尚未設定</option>{% for item in flow_directions %}<option value="{{ item }}">{{ item }}</option>{% endfor %}</select>
+                </div>
+                <div class="ems-span-3"><label for="field-notes">備註</label><textarea id="field-notes" name="notes" rows="3"></textarea></div>
+            </div>
+        </div>
+        <div class="ems-dialog-actions"><button id="cancel-edit" type="button">取消</button><button type="submit">儲存設定</button></div>
+    </form>
+</dialog>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(() => {
+    const points = {{ point_payloads | tojson }};
+    const dialog = document.querySelector("#ems-edit-dialog");
+    const form = document.querySelector("#ems-edit-form");
+    const updateUrlTemplate = {{ url_for('update_ems_point', point_id=0) | tojson }};
+    const selectedCount = document.querySelector("#selected-count");
+    const pointChecks = Array.from(document.querySelectorAll(".point-select"));
+    const selectAll = document.querySelector("#select-all");
+
+    function refreshSelectedCount() {
+        selectedCount.textContent = pointChecks.filter((input) => input.checked).length;
+        selectAll.checked = pointChecks.length > 0 && pointChecks.every((input) => input.checked);
+        selectAll.indeterminate = pointChecks.some((input) => input.checked) && !selectAll.checked;
+    }
+    selectAll.addEventListener("change", () => {
+        pointChecks.forEach((input) => { input.checked = selectAll.checked; });
+        refreshSelectedCount();
+    });
+    pointChecks.forEach((input) => input.addEventListener("change", refreshSelectedCount));
+
+    function setValue(id, value) {
+        document.querySelector(id).value = value === null || value === undefined ? "" : value;
+    }
+    function openEditor(point) {
+        form.action = updateUrlTemplate.replace(/\/0$/, `/${point.id}`);
+        document.querySelector("#source-id").textContent = point.external_id;
+        document.querySelector("#source-point-name").textContent = point.point_name || "（空白）";
+        document.querySelector("#source-json-path").textContent = point.json_path || "（空白）";
+        document.querySelector("#source-name").textContent = point.source_name;
+        document.querySelector("#source-description").textContent = point.description || "（空白）";
+        document.querySelector("#field-monitor").checked = Boolean(point.monitor_enabled);
+        setValue("#field-lower", point.lower_limit);
+        setValue("#field-upper", point.upper_limit);
+        setValue("#field-severity", point.alarm_severity || "warning");
+        setValue("#field-alarm-value-mode", point.alarm_value_mode || "raw");
+        setValue("#field-consecutive", point.alarm_consecutive_samples ?? 1);
+        setValue("#field-deadband", point.alarm_deadband ?? 0);
+        setValue("#field-display-name", point.display_name);
+        setValue("#field-category", point.energy_category_id);
+        setValue("#field-measurement", point.measurement_type_id);
+        setValue("#field-unit", point.unit_id);
+        setValue("#field-location", point.location_id);
+        setValue("#field-equipment", point.equipment_name);
+        setValue("#field-value-type", point.value_type);
+        setValue("#field-aggregation", point.aggregation_method);
+        setValue("#field-direction", point.flow_direction);
+        setValue("#field-notes", point.notes);
+        const interval = point.fetch_interval_minutes || 60;
+        document.querySelector("#consecutive-help").textContent =
+            `目前每 ${interval} 分鐘收集一次；連續幾次超限才告警。`;
+        document.querySelector("#ems-validation").style.display = "none";
+        dialog.showModal();
+    }
+    document.querySelectorAll(".edit-point").forEach((button) => {
+        button.addEventListener("click", () => {
+            const point = points.find((item) => item.id === Number(button.dataset.pointId));
+            if (point) openEditor(point);
+        });
+    });
+    document.querySelector("#close-dialog").addEventListener("click", () => dialog.close());
+    document.querySelector("#cancel-edit").addEventListener("click", () => dialog.close());
+    dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close(); });
+    document.querySelector("#field-value-type").addEventListener("change", (event) => {
+        if (event.target.value === "cumulative") {
+            document.querySelector("#field-alarm-value-mode").value = "interval_delta";
+        } else if (event.target.value === "instantaneous" || event.target.value === "state") {
+            document.querySelector("#field-alarm-value-mode").value = "raw";
+        }
+    });
+    form.addEventListener("submit", (event) => {
+        const lower = document.querySelector("#field-lower").value;
+        const upper = document.querySelector("#field-upper").value;
+        if (lower !== "" && upper !== "" && Number(lower) > Number(upper)) {
+            event.preventDefault();
+            const validation = document.querySelector("#ems-validation");
+            validation.textContent = "下限不可大於上限，請修正後再儲存。";
+            validation.style.display = "block";
+        }
+    });
+})();
+</script>
+{% endblock %}
