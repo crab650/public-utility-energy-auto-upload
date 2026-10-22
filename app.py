@@ -358,6 +358,7 @@ def init_db() -> None:
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT NOT NULL UNIQUE,
+            archived_username TEXT,
             password TEXT NOT NULL,
             display_name TEXT NOT NULL,
             role TEXT NOT NULL CHECK(role IN ('admin', 'filler')),
@@ -566,6 +567,14 @@ def init_db() -> None:
         row["name"] for row in db.execute("PRAGMA table_info(users)").fetchall()
     }:
         db.execute("ALTER TABLE users ADD COLUMN must_change_password INTEGER NOT NULL DEFAULT 0")
+    if "archived_username" not in {
+        row["name"] for row in db.execute("PRAGMA table_info(users)").fetchall()
+    }:
+        db.execute("ALTER TABLE users ADD COLUMN archived_username TEXT")
+    for user in db.execute(
+        "SELECT id, username FROM users WHERE active = 0 AND archived_username IS NULL"
+    ).fetchall():
+        archive_user(db, user["id"], user["username"])
     if "api_name" not in {
         row["name"] for row in db.execute("PRAGMA table_info(energy_types)").fetchall()
     }:
@@ -603,6 +612,23 @@ def init_db() -> None:
         )
     db.commit()
     sync_bundled_device_points(db)
+
+
+def archive_user(db: sqlite3.Connection, user_id: int, username: str) -> None:
+    archived_login = f"__deleted_user_{user_id}__"
+    while db.execute(
+        "SELECT 1 FROM users WHERE username = ? AND id != ?",
+        (archived_login, user_id),
+    ).fetchone():
+        archived_login += "_"
+    db.execute(
+        """
+        UPDATE users
+        SET username = ?, archived_username = COALESCE(archived_username, username), active = 0
+        WHERE id = ?
+        """,
+        (archived_login, user_id),
+    )
 
 
 def seed_control_limits(db: sqlite3.Connection, replace: bool = False, percentage: float = 0.1) -> None:
@@ -1265,7 +1291,7 @@ def admin_users():
                     (username, display_name, account_type == "viewer"),
                 )
                 user_id = db.execute(
-                    "SELECT id FROM users WHERE username = ?",
+                    "SELECT id FROM users WHERE username = ? AND active = 1",
                     (username,),
                 ).fetchone()["id"]
                 if account_type == "filler":
@@ -1403,7 +1429,7 @@ def delete_user(user_id: int):
         flash("找不到可刪除的帳號。", "warning")
         return redirect(url_for("admin_users"))
 
-    db.execute("UPDATE users SET active = 0 WHERE id = ?", (user_id,))
+    archive_user(db, user_id, user["username"])
     db.commit()
     log_action("delete_user", f"Deactivated account: {user['username']} (ID: {user_id})")
     flash("帳號已刪除，歷史填報資料已保留。", "success")

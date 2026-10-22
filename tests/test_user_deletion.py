@@ -75,6 +75,63 @@ class UserDeletionTests(unittest.TestCase):
             self.assertEqual(db.execute("SELECT active FROM users WHERE id = ?", (admin_id,)).fetchone()[0], 1)
             self.assertEqual(db.execute("SELECT active FROM users WHERE id = ?", (guest_id,)).fetchone()[0], 0)
 
+    def test_deleted_username_can_be_reused_without_mixing_history(self) -> None:
+        self.admin.post("/login", data={"username": "admin", "password": "1234"})
+        self.admin.post("/admin/users", data={"username": "reporter", "display_name": "Old Reporter"})
+        with closing(sqlite3.connect(application.DB_PATH)) as db:
+            old_id = db.execute("SELECT id FROM users WHERE username = 'reporter'").fetchone()[0]
+            db.execute(
+                "INSERT INTO report_submissions (report_month, user_id) VALUES ('2026-01', ?)",
+                (old_id,),
+            )
+            db.commit()
+
+        self.admin.post(f"/admin/users/{old_id}/delete")
+        response = self.admin.post(
+            "/admin/users",
+            data={"username": "reporter", "display_name": "New Reporter"},
+            follow_redirects=True,
+        )
+        self.assertNotIn("帳號已存在。", response.get_data(as_text=True))
+        with closing(sqlite3.connect(application.DB_PATH)) as db:
+            old_user = db.execute(
+                "SELECT username, archived_username, active FROM users WHERE id = ?", (old_id,)
+            ).fetchone()
+            new_id = db.execute("SELECT id FROM users WHERE username = 'reporter'").fetchone()[0]
+            self.assertNotEqual(old_id, new_id)
+            self.assertEqual(old_user[1:], ("reporter", 0))
+            self.assertNotEqual(old_user[0], "reporter")
+            self.assertEqual(
+                db.execute("SELECT user_id FROM report_submissions WHERE report_month = '2026-01'").fetchone()[0],
+                old_id,
+            )
+        duplicate = self.admin.post(
+            "/admin/users", data={"username": "reporter"}, follow_redirects=True
+        )
+        self.assertIn("帳號已存在。", duplicate.get_data(as_text=True))
+
+    def test_existing_inactive_username_is_released_on_upgrade(self) -> None:
+        self.admin.post("/login", data={"username": "admin", "password": "1234"})
+        with closing(sqlite3.connect(application.DB_PATH)) as db:
+            db.execute(
+                "INSERT INTO users (username, password, display_name, role, active) "
+                "VALUES ('legacy', '1234', 'Legacy Reporter', 'filler', 0)"
+            )
+            old_id = db.execute("SELECT id FROM users WHERE username = 'legacy'").fetchone()[0]
+            db.commit()
+            db.execute("ALTER TABLE users DROP COLUMN archived_username")
+        application._INITIALIZED_DB_PATH = None
+        self.admin.get("/admin/users")
+        self.admin.post("/admin/users", data={"username": "legacy"})
+        with closing(sqlite3.connect(application.DB_PATH)) as db:
+            rows = db.execute(
+                "SELECT id, archived_username, active FROM users "
+                "WHERE archived_username = 'legacy' OR username = 'legacy' ORDER BY id"
+            ).fetchall()
+            self.assertEqual(len(rows), 2)
+            self.assertEqual(tuple(rows[0]), (old_id, "legacy", 0))
+            self.assertEqual(tuple(rows[1])[1:], (None, 1))
+
     def test_account_settings_open_only_after_selection(self) -> None:
         self.admin.post("/login", data={"username": "admin", "password": "1234"})
         self.admin.post("/admin/users", data={"username": "reporter", "account_type": "filler"})
