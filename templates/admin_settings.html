@@ -37,10 +37,11 @@
 
 <section class="panel">
     <h2>目前能源種類</h2>
+    <p class="muted">留空表示暫不輸出至 API。名稱只能使用英文字母、數字和底線，且須以英文字母開頭。</p>
     <div class="table-wrap">
         <table>
             <thead>
-                <tr><th>排序</th><th>能源種類</th><th>單位</th></tr>
+                <tr><th>排序</th><th>能源種類</th><th>單位</th><th>API 名稱</th></tr>
             </thead>
             <tbody>
                 {% for energy_type in energy_types %}
@@ -48,6 +49,14 @@
                         <td>{{ energy_type.display_order }}</td>
                         <td>{{ energy_type.name }}</td>
                         <td>{{ energy_type.unit }}</td>
+                        <td>
+                            <form method="post" class="form-row">
+                                <input type="hidden" name="action" value="update_energy_api_name">
+                                <input type="hidden" name="energy_type_id" value="{{ energy_type.id }}">
+                                <input name="api_name" value="{{ energy_type.api_name }}" maxlength="64" pattern="[A-Za-z][A-Za-z0-9_]*" aria-label="{{ energy_type.name }} API 名稱" style="min-width: 180px" autocomplete="off">
+                                <button type="submit">儲存</button>
+                            </form>
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>

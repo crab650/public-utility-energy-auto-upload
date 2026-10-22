@@ -3,35 +3,28 @@
 {% block content %}
 <h1>帳號與權限管理</h1>
 
-<section class="panel">
-    <h2>新增填寫員或訪客</h2>
-    <form method="post" class="form-row">
-        <div>
-            <label for="username">帳號</label>
-            <input id="username" name="username" required>
-        </div>
-        <div>
-            <label for="password">密碼</label>
-            <input id="password" name="password" required>
-        </div>
-        <div>
-            <label for="display_name">顯示名稱</label>
-            <input id="display_name" name="display_name">
-        </div>
-        <div>
-            <label for="account_type">帳號權限</label>
-            <select id="account_type" name="account_type">
-                <option value="filler">填寫員</option>
-                <option value="viewer">訪客（僅查看及匯出）</option>
-            </select>
-        </div>
-        <div>
-            <button type="submit">建立</button>
-        </div>
-    </form>
-</section>
+{% if users %}
+    <section class="panel">
+        <h2>選擇帳號</h2>
+        <form method="get" action="{{ url_for('admin_users') }}" class="form-row">
+            <div>
+                <label for="selected_user_id">帳號</label>
+                <select id="selected_user_id" name="user_id" required>
+                    <option value="" disabled {% if not selected_user %}selected{% endif %}>請先選擇帳號</option>
+                    {% for account in users %}
+                        <option value="{{ account.id }}" {% if selected_user and selected_user.id == account.id %}selected{% endif %}>
+                            {{ account.display_name }} ({{ account.username }}) - {{ ('訪客（唯讀）' if account.viewer else '填寫員') | label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div><button type="submit">查看帳號設定</button></div>
+        </form>
+    </section>
+{% endif %}
 
-{% for user in users %}
+{% if selected_user %}
+    {% set user = selected_user %}
     <section class="panel">
         <h2>
             {{ user.display_name }} <span class="muted">({{ user.username }})</span>
@@ -47,7 +40,7 @@
                             type="checkbox"
                             name="energy_type_ids"
                             value="{{ energy_type.id }}"
-                            {% if energy_type.id|string in energy_permissions.get(user.id, []) %}checked{% endif %}
+                            {% if energy_type.id in energy_permissions %}checked{% endif %}
                         >
                         {{ energy_type.name }} / {{ energy_type.unit }}
                     </label>
@@ -61,7 +54,7 @@
                             type="checkbox"
                             name="area_ids"
                             value="{{ area.id }}"
-                            {% if area.id|string in area_permissions.get(user.id, []) %}checked{% endif %}
+                            {% if area.id in area_permissions %}checked{% endif %}
                         >
                         {{ area.name }}
                     </label>
@@ -83,8 +76,34 @@
                 <button class="secondary" type="submit">重設密碼</button>
             </div>
         </form>
+        <form method="post" action="{{ url_for('delete_user', user_id=user.id) }}" style="margin-top: 16px;" data-confirm="{{ '確定刪除這個帳號？歷史填報資料會保留。' | label }}" onsubmit="return confirm(this.dataset.confirm)">
+            <button type="submit" class="secondary">刪除帳號</button>
+        </form>
     </section>
-{% else %}
-    <div class="panel muted">尚未建立填寫員。</div>
-{% endfor %}
+{% elif users %}
+    <div class="panel muted">請先選擇帳號，再設定權限或管理帳號。</div>
+{% endif %}
+
+<section class="panel">
+    <h2>新增填寫員或訪客</h2>
+    <form method="post" class="form-row">
+        <div>
+            <label for="username">帳號</label>
+            <input id="username" name="username" required>
+        </div>
+        <div>
+            <label for="display_name">顯示名稱</label>
+            <input id="display_name" name="display_name">
+        </div>
+        <div>
+            <label for="account_type">帳號權限</label>
+            <select id="account_type" name="account_type">
+                <option value="filler">填寫員</option>
+                <option value="viewer">訪客（僅查看及匯出）</option>
+            </select>
+        </div>
+        <div><button type="submit">建立</button></div>
+    </form>
+    <p class="muted">新帳號預設密碼為 1234，首次登入時必須變更密碼。</p>
+</section>
 {% endblock %}

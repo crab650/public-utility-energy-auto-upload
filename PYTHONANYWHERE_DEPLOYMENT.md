@@ -28,6 +28,7 @@ if project_path not in sys.path:
 
 os.environ["ENERGY_DATABASE_PATH"] = "/home/YOUR_USERNAME/energy-data/app.db"
 os.environ["ENERGY_SECRET_KEY"] = "請換成至少 32 bytes 的隨機字串"
+os.environ["ENERGY_API_KEY"] = "請換成另一組長且隨機的 API 金鑰"
 
 from app import app as application
 ```

@@ -55,7 +55,9 @@ class EmsPointFeatureTests(unittest.TestCase):
     def test_package_import_and_energy_mount_in_isolated_process(self) -> None:
         script = r'''
 import importlib
+import html
 import os
+import re
 import sys
 import types
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
@@ -77,9 +79,29 @@ assert response.status_code == 302, response.status_code
 assert response.location == "/energy/login", response.location
 assert client.get(response.location).status_code == 200
 client.post("/energy/login", data={"username": "admin", "password": "1234"})
-response = client.get("/energy/admin/ems-points")
+response = client.get("/energy/admin/ems-points?monitor=on&page=2")
 assert response.status_code == 200
-assert '/energy/admin/ems-points/bulk' in response.get_data(as_text=True)
+page = response.get_data(as_text=True)
+assert '/energy/admin/ems-points/bulk' in page
+return_to = html.unescape(re.search(r'name="return_to" value="([^"]+)"', page).group(1))
+assert return_to == "/energy/admin/ems-points?monitor=on&page=2", return_to
+with module.app.app_context():
+    point_id = module.get_db().execute("SELECT id FROM device_data_points WHERE external_id = 2").fetchone()[0]
+response = client.post(f"/energy/admin/ems-points/{point_id}", data={
+    "return_to": return_to, "display_name": "Mounted point",
+})
+assert response.status_code == 302
+assert response.location == return_to.rstrip("?"), response.location
+assert client.get(response.location).status_code == 200
+with module.app.app_context():
+    saved = module.get_db().execute("SELECT display_name FROM ems_point_configs WHERE point_id = ?", (point_id,)).fetchone()[0]
+assert saved == "Mounted point", saved
+response = client.post("/energy/admin/ems-points/bulk", data={
+    "return_to": return_to, "point_ids": [str(point_id)], "action": "monitor_off",
+})
+assert response.status_code == 302
+assert response.location == return_to, response.location
+assert client.get(response.location).status_code == 200
 response = client.post("/energy/language/vi", data={"next": "/energy/admin/ems-points"})
 assert response.location == "/energy/admin/ems-points"
 response = client.get(response.location)
@@ -233,6 +255,31 @@ assert client.get("/energy/reports?start_month=2025-10&end_month=2026-03").statu
             workbook = load_workbook(BytesIO(export.data))
             self.assertEqual(workbook.active.max_row, expected + 1)
             workbook.close()
+
+    def test_ems_fill_template_has_all_points_and_editable_settings(self) -> None:
+        self.login_admin()
+        with self.database() as db:
+            point = db.execute(
+                "SELECT id, external_id FROM device_data_points WHERE data_source_id = 1 ORDER BY external_id LIMIT 1"
+            ).fetchone()
+            db.execute(
+                "UPDATE ems_point_configs SET display_name = ?, lower_limit = ?, alarm_value_mode = ? WHERE point_id = ?",
+                ("=SUM(1,2)", 3.5, "interval_delta", point["id"]),
+            )
+            db.commit()
+        response = self.client.get("/admin/ems-points/template", query_string={"q": "no matching point"})
+        self.assertEqual(response.status_code, 200)
+        workbook = load_workbook(BytesIO(response.data))
+        sheet = workbook["EMS設定填寫"]
+        self.assertEqual(sheet.max_row, 389)
+        self.assertEqual(sheet["B2"].value, point["external_id"])
+        self.assertEqual(sheet["H2"].value, 3.5)
+        self.assertEqual(sheet["K2"].value, "每次收集差值")
+        self.assertEqual(sheet["N2"].value, "=SUM(1,2)")
+        self.assertEqual(sheet["N2"].data_type, "s")
+        self.assertIn("填寫說明", workbook.sheetnames)
+        self.assertGreaterEqual(len(sheet.data_validations.dataValidation), 8)
+        workbook.close()
 
     def test_bilingual_ui_preserves_user_data_and_submitted_values(self) -> None:
         self.login_admin()

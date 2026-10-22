@@ -1,19 +1,29 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="panel login-box">
-    <h1>登入</h1>
-    <form method="post">
-        <div style="margin-bottom: 12px;">
-            <label for="username">帳號</label>
-            <input id="username" name="username" autocomplete="username" required>
+<div class="login-landing">
+    <div class="login-visual">
+        <img src="{{ url_for('static', filename='images/energy-login-hero.webp') }}" alt="夜色中的工廠、水管與供電設備" width="1942" height="809">
+        <div class="login-visual-copy">
+            <p class="eyebrow">公用能源管理</p>
+            <h2>看見每一度能源的流向</h2>
+            <p>整合水、電與蒸汽資料，讓各單位填報與能源管理更清楚。</p>
         </div>
-        <div style="margin-bottom: 16px;">
-            <label for="password">密碼</label>
-            <input id="password" name="password" type="password" autocomplete="current-password" required>
-        </div>
-        <button type="submit">登入</button>
-    </form>
-    <p class="muted">管理者預設帳號：admin / 1234</p>
+    </div>
+    <div class="panel login-box login-panel">
+        <h1>登入</h1>
+        <p class="login-intro">登入系統，開始填報與查詢能源資料。</p>
+        <form method="post">
+            <div style="margin-bottom: 18px;">
+                <label for="username">帳號</label>
+                <input id="username" name="username" autocomplete="username" required>
+            </div>
+            <div style="margin-bottom: 22px;">
+                <label for="password">密碼</label>
+                <input id="password" name="password" type="password" autocomplete="current-password" required>
+            </div>
+            <button type="submit">登入</button>
+        </form>
+    </div>
 </div>
 {% endblock %}

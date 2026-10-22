@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import hmac
 import json
 import math
 import os
@@ -11,8 +12,10 @@ from datetime import date, datetime, timedelta, timezone
 from io import BytesIO
 from pathlib import Path
 
-from flask import Flask, flash, g, redirect, render_template, request, send_file, session, url_for
+from flask import Flask, flash, g, jsonify, redirect, render_template, request, send_file, session, url_for
 from openpyxl import Workbook
+from openpyxl.styles import Alignment, Font, PatternFill
+from openpyxl.worksheet.datavalidation import DataValidation
 from jinja2 import pass_context
 from markupsafe import Markup
 if __package__:
@@ -41,7 +44,6 @@ VI_TRANSLATIONS = {
     "登入": "Đăng nhập",
     "帳號": "Tài khoản",
     "密碼": "Mật khẩu",
-    "管理者預設帳號": "Tài khoản quản trị mặc định",
     "能源資料輸入": "Nhập dữ liệu năng lượng",
     "填報月份": "Tháng khai báo",
     "每月填報上個月份資料；可選擇更早月份補填或修正。": "Mỗi tháng khai báo dữ liệu của tháng trước; có thể chọn tháng cũ hơn để bổ sung hoặc chỉnh sửa.",
@@ -140,6 +142,14 @@ VI_TRANSLATIONS = {
     "區域名稱": "Tên khu vực",
     "例如：Poly 51": "Ví dụ: Poly 51",
     "目前能源種類": "Các loại năng lượng hiện tại",
+    "API 名稱": "Tên API",
+    "儲存": "Lưu",
+    "留空表示暫不輸出至 API。名稱只能使用英文字母、數字和底線，且須以英文字母開頭。": "Để trống nếu chưa xuất qua API. Tên chỉ được gồm chữ cái, số và dấu gạch dưới, và phải bắt đầu bằng chữ cái.",
+    "API 名稱格式不正確。": "Định dạng tên API không hợp lệ.",
+    "API 名稱不可使用 month 或 department。": "Tên API không được là month hoặc department.",
+    "API 名稱已被其他能源種類使用。": "Tên API đã được loại năng lượng khác sử dụng.",
+    "API 名稱已儲存。": "Đã lưu tên API.",
+    "找不到能源種類。": "Không tìm thấy loại năng lượng.",
     "排序": "Thứ tự",
     "目前區域": "Các khu vực hiện tại",
     "能源分析看板": "Bảng phân tích năng lượng",
@@ -310,6 +320,14 @@ def previous_report_month(value: str) -> str:
     return f"{year}-{month - 1:02d}"
 
 
+def shift_report_month(value: str, offset: int) -> str:
+    year, month = (int(part) for part in value.split("-"))
+    shifted_year, shifted_month = divmod(year * 12 + month - 1 + offset, 12)
+    if not 1 <= shifted_year <= 9999:
+        raise ValueError("月份超出可查詢範圍。")
+    return f"{shifted_year:04d}-{shifted_month + 1:02d}"
+
+
 def get_db() -> sqlite3.Connection:
     if "db" not in g:
         DB_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -345,6 +363,7 @@ def init_db() -> None:
             role TEXT NOT NULL CHECK(role IN ('admin', 'filler')),
             viewer INTEGER NOT NULL DEFAULT 0,
             active INTEGER NOT NULL DEFAULT 1,
+            must_change_password INTEGER NOT NULL DEFAULT 0,
             created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
         );
 
@@ -353,7 +372,8 @@ def init_db() -> None:
             name TEXT NOT NULL UNIQUE,
             unit TEXT NOT NULL,
             active INTEGER NOT NULL DEFAULT 1,
-            display_order INTEGER NOT NULL DEFAULT 0
+            display_order INTEGER NOT NULL DEFAULT 0,
+            api_name TEXT NOT NULL DEFAULT ''
         );
 
         CREATE TABLE IF NOT EXISTS areas (
@@ -542,6 +562,18 @@ def init_db() -> None:
         row["name"] for row in db.execute("PRAGMA table_info(users)").fetchall()
     }:
         db.execute("ALTER TABLE users ADD COLUMN viewer INTEGER NOT NULL DEFAULT 0")
+    if "must_change_password" not in {
+        row["name"] for row in db.execute("PRAGMA table_info(users)").fetchall()
+    }:
+        db.execute("ALTER TABLE users ADD COLUMN must_change_password INTEGER NOT NULL DEFAULT 0")
+    if "api_name" not in {
+        row["name"] for row in db.execute("PRAGMA table_info(energy_types)").fetchall()
+    }:
+        db.execute("ALTER TABLE energy_types ADD COLUMN api_name TEXT NOT NULL DEFAULT ''")
+    db.execute(
+        "CREATE UNIQUE INDEX IF NOT EXISTS idx_energy_types_api_name "
+        "ON energy_types(lower(api_name)) WHERE api_name <> ''"
+    )
     ems_config_columns = {
         row["name"] for row in db.execute("PRAGMA table_info(ems_point_configs)").fetchall()
     }
@@ -900,12 +932,18 @@ def sync_bundled_device_points(db: sqlite3.Connection) -> dict | None:
 def before_request() -> None:
     global _INITIALIZED_DB_PATH
     resolved_db_path = DB_PATH.resolve()
-    if _INITIALIZED_DB_PATH == resolved_db_path:
-        return
-    with _DB_INIT_LOCK:
-        if _INITIALIZED_DB_PATH != resolved_db_path:
-            init_db()
-            _INITIALIZED_DB_PATH = resolved_db_path
+    if _INITIALIZED_DB_PATH != resolved_db_path:
+        with _DB_INIT_LOCK:
+            if _INITIALIZED_DB_PATH != resolved_db_path:
+                init_db()
+                _INITIALIZED_DB_PATH = resolved_db_path
+
+    g.must_change_password = False
+    if session.get("user_id"):
+        user = current_user()
+        g.must_change_password = bool(user and user["must_change_password"])
+        if g.must_change_password and request.endpoint not in {"change_password", "logout", "set_language", "static"}:
+            return redirect(url_for("change_password"))
 
 
 def current_user() -> sqlite3.Row | None:
@@ -999,11 +1037,44 @@ def login():
             session["role"] = "viewer" if user["viewer"] else user["role"]
             flash("登入成功。", "success")
             log_action("login", f"Successful login from role: {session['role']}")
+            if user["must_change_password"]:
+                return redirect(url_for("change_password"))
             return redirect(url_for("index"))
 
         flash("帳號或密碼錯誤。", "danger")
 
     return render_template("login.html")
+
+
+@app.route("/change-password", methods=["GET", "POST"])
+def change_password():
+    user = current_user()
+    if user is None:
+        return redirect(url_for("login"))
+
+    if request.method == "POST":
+        current_password = request.form.get("current_password", "")
+        new_password = request.form.get("new_password", "")
+        confirm_password = request.form.get("confirm_password", "")
+        if not hmac.compare_digest(current_password.encode("utf-8"), user["password"].encode("utf-8")):
+            flash("目前密碼不正確。", "danger")
+        elif len(new_password) < 8:
+            flash("新密碼至少需要 8 個字元。", "danger")
+        elif new_password == current_password or new_password == "1234":
+            flash("新密碼不可與預設或目前密碼相同。", "danger")
+        elif new_password != confirm_password:
+            flash("兩次輸入的新密碼不一致。", "danger")
+        else:
+            db = get_db()
+            db.execute(
+                "UPDATE users SET password = ?, must_change_password = 0 WHERE id = ? AND active = 1",
+                (new_password, user["id"]),
+            )
+            db.commit()
+            log_action("change_password", "Changed own password")
+            flash("密碼已更新。", "success")
+            return redirect(url_for("index"))
+    return render_template("change_password.html", must_change_password=bool(user["must_change_password"]))
 
 
 @app.route("/logout", methods=["POST"])
@@ -1178,21 +1249,20 @@ def admin_users():
     db = get_db()
     if request.method == "POST":
         username = request.form.get("username", "").strip()
-        password = request.form.get("password", "").strip()
         display_name = request.form.get("display_name", "").strip() or username
         account_type = request.form.get("account_type", "filler")
         if account_type not in {"filler", "viewer"}:
             account_type = "filler"
-        if not username or not password:
-            flash("請輸入帳號與密碼。", "danger")
+        if not username:
+            flash("請輸入帳號。", "danger")
         else:
             try:
                 db.execute(
                     """
-                    INSERT INTO users (username, password, display_name, role, viewer)
-                    VALUES (?, ?, ?, 'filler', ?)
+                    INSERT INTO users (username, password, display_name, role, viewer, must_change_password)
+                    VALUES (?, '1234', ?, 'filler', ?, 1)
                     """,
-                    (username, password, display_name, account_type == "viewer"),
+                    (username, display_name, account_type == "viewer"),
                 )
                 user_id = db.execute(
                     "SELECT id FROM users WHERE username = ?",
@@ -1209,6 +1279,7 @@ def admin_users():
                 db.commit()
                 log_action("create_user", f"Created account {username} as {account_type}")
                 flash("填寫員已建立。", "success")
+                return redirect(url_for("admin_users", user_id=user_id))
             except sqlite3.IntegrityError:
                 flash("帳號已存在。", "danger")
         return redirect(url_for("admin_users"))
@@ -1216,33 +1287,33 @@ def admin_users():
     users = db.execute(
         """
         SELECT * FROM users
-        WHERE role = 'filler'
+        WHERE role = 'filler' AND active = 1
         ORDER BY id DESC
         """
     ).fetchall()
-    energy_permissions = {
-        row["user_id"]: set(row["energy_ids"].split(",") if row["energy_ids"] else [])
-        for row in db.execute(
-            """
-            SELECT user_id, GROUP_CONCAT(energy_type_id) AS energy_ids
-            FROM user_energy_permissions
-            GROUP BY user_id
-            """
-        ).fetchall()
-    }
-    area_permissions = {
-        row["user_id"]: set(row["area_ids"].split(",") if row["area_ids"] else [])
-        for row in db.execute(
-            """
-            SELECT user_id, GROUP_CONCAT(area_id) AS area_ids
-            FROM user_area_permissions
-            GROUP BY user_id
-            """
-        ).fetchall()
-    }
+    selected_user_id = request.args.get("user_id", type=int)
+    selected_user = next((user for user in users if user["id"] == selected_user_id), None)
+    energy_permissions = set()
+    area_permissions = set()
+    if selected_user is not None:
+        energy_permissions = {
+            row["energy_type_id"]
+            for row in db.execute(
+                "SELECT energy_type_id FROM user_energy_permissions WHERE user_id = ?",
+                (selected_user_id,),
+            ).fetchall()
+        }
+        area_permissions = {
+            row["area_id"]
+            for row in db.execute(
+                "SELECT area_id FROM user_area_permissions WHERE user_id = ?",
+                (selected_user_id,),
+            ).fetchall()
+        }
     return render_template(
         "admin_users.html",
         users=users,
+        selected_user=selected_user,
         energy_types=active_energy_types(),
         areas=active_areas(),
         energy_permissions=energy_permissions,
@@ -1258,7 +1329,7 @@ def update_user_permissions(user_id: int):
 
     db = get_db()
     user = db.execute(
-        "SELECT * FROM users WHERE id = ? AND role = 'filler' AND viewer = 0",
+        "SELECT * FROM users WHERE id = ? AND role = 'filler' AND viewer = 0 AND active = 1",
         (user_id,),
     ).fetchone()
     if user is None:
@@ -1286,7 +1357,7 @@ def update_user_permissions(user_id: int):
     db.commit()
     log_action("update_permissions", f"Updated Y/X permissions for filler: {user['username']}")
     flash("填寫權限已更新。", "success")
-    return redirect(url_for("admin_users"))
+    return redirect(url_for("admin_users", user_id=user_id))
 
 
 @app.route("/admin/users/<int:user_id>/password", methods=["POST"])
@@ -1298,13 +1369,13 @@ def reset_user_password(user_id: int):
     new_password = request.form.get("new_password", "").strip()
     if not new_password:
         flash("請輸入新密碼。", "danger")
-        return redirect(url_for("admin_users"))
+        return redirect(url_for("admin_users", user_id=user_id))
 
     result = get_db().execute(
         """
         UPDATE users
-        SET password = ?
-        WHERE id = ? AND role = 'filler'
+        SET password = ?, must_change_password = 1
+        WHERE id = ? AND role = 'filler' AND active = 1
         """,
         (new_password, user_id),
     )
@@ -1314,6 +1385,28 @@ def reset_user_password(user_id: int):
         flash("密碼已重設。", "success")
     else:
         flash("找不到填寫員。", "warning")
+    return redirect(url_for("admin_users", user_id=user_id))
+
+
+@app.route("/admin/users/<int:user_id>/delete", methods=["POST"])
+def delete_user(user_id: int):
+    guard = admin_required()
+    if guard:
+        return guard
+
+    db = get_db()
+    user = db.execute(
+        "SELECT username FROM users WHERE id = ? AND role = 'filler' AND active = 1",
+        (user_id,),
+    ).fetchone()
+    if user is None:
+        flash("找不到可刪除的帳號。", "warning")
+        return redirect(url_for("admin_users"))
+
+    db.execute("UPDATE users SET active = 0 WHERE id = ?", (user_id,))
+    db.commit()
+    log_action("delete_user", f"Deactivated account: {user['username']} (ID: {user_id})")
+    flash("帳號已刪除，歷史填報資料已保留。", "success")
     return redirect(url_for("admin_users"))
 
 
@@ -1360,6 +1453,29 @@ def admin_settings():
                 flash("區域已新增。", "success")
             except sqlite3.IntegrityError:
                 flash("區域已存在。", "danger")
+        return redirect(url_for("admin_settings"))
+
+    if request.method == "POST" and action == "update_energy_api_name":
+        try:
+            energy_type_id = int(request.form.get("energy_type_id", ""))
+        except ValueError:
+            energy_type_id = -1
+        api_name = request.form.get("api_name", "").strip()
+        if api_name and (len(api_name) > 64 or not re.fullmatch(r"[A-Za-z][A-Za-z0-9_]*", api_name)):
+            flash("API 名稱格式不正確。", "danger")
+        elif api_name.lower() in {"month", "department"}:
+            flash("API 名稱不可使用 month 或 department。", "danger")
+        elif db.execute("SELECT 1 FROM energy_types WHERE id = ? AND active = 1", (energy_type_id,)).fetchone() is None:
+            flash("找不到能源種類。", "danger")
+        else:
+            try:
+                db.execute("UPDATE energy_types SET api_name = ? WHERE id = ?", (api_name, energy_type_id))
+                db.commit()
+                log_action("update_energy_api_name", f"Energy type ID {energy_type_id}: {api_name or '(empty)'}")
+                flash("API 名稱已儲存。", "success")
+            except sqlite3.IntegrityError:
+                db.rollback()
+                flash("API 名稱已被其他能源種類使用。", "danger")
         return redirect(url_for("admin_settings"))
 
     return render_template(
@@ -1935,6 +2051,109 @@ def export_ems_points():
     )
 
 
+@app.route("/admin/ems-points/template", methods=["GET"])
+def export_ems_point_template():
+    guard = admin_required()
+    if guard:
+        return guard
+
+    db = get_db()
+    rows = db.execute(
+        ems_point_select_sql("dp.data_source_id = 1") + " ORDER BY dp.external_id"
+    ).fetchall()
+    workbook = Workbook()
+    sheet = workbook.active
+    sheet.title = "EMS設定填寫"
+    headers = [
+        "DataSourceId", "外部 Id", "PointName", "JsonPath", "來源說明", "來源存在",
+        "是否監控", "下限", "上限", "告警等級", "告警判斷值", "連續異常次數",
+        "告警解除緩衝", "EMS 顯示名稱", "能源類別", "測量類型", "工程單位",
+        "區域", "設備／系統", "數值性質", "統計方式", "流向", "備註",
+    ]
+    sheet.append(headers)
+    category_names = [row["name"] for row in ems_lookup_rows("ems_energy_categories")]
+    measurement_names = [row["name"] for row in ems_lookup_rows("ems_measurement_types")]
+    unit_names = [row["name"] for row in ems_lookup_rows("ems_units")]
+    location_names = [row["name"] for row in ems_lookup_rows("ems_locations")]
+    for row in rows:
+        sheet.append([
+            row["data_source_id"], row["external_id"], row["point_name"], row["json_path"],
+            row["description"], "是" if row["source_present"] else "否",
+            "是" if row["monitor_enabled"] else "否", row["lower_limit"], row["upper_limit"],
+            EMS_ALARM_SEVERITIES.get(row["alarm_severity"], row["alarm_severity"]),
+            EMS_ALARM_VALUE_MODES.get(row["alarm_value_mode"], row["alarm_value_mode"]),
+            row["alarm_consecutive_samples"], row["alarm_deadband"], row["display_name"],
+            row["category_name"], row["measurement_name"], row["unit_name"],
+            row["location_name"], row["equipment_name"],
+            EMS_VALUE_TYPES.get(row["value_type"], row["value_type"]),
+            EMS_AGGREGATION_METHODS.get(row["aggregation_method"], row["aggregation_method"]),
+            row["flow_direction"], row["notes"],
+        ])
+    sheet.freeze_panes = "G2"
+    sheet.auto_filter.ref = sheet.dimensions
+    for cell in sheet[1]:
+        cell.fill = PatternFill("solid", fgColor="D9E2F3" if cell.column <= 6 else "FFF2CC")
+        cell.font = Font(bold=True)
+        cell.alignment = Alignment(wrap_text=True, vertical="center")
+    sheet.row_dimensions[1].height = 30
+    for column in sheet.columns:
+        width = max(len(str(cell.value or "")) for cell in column[: min(len(column), 30)]) + 3
+        sheet.column_dimensions[column[0].column_letter].width = min(max(width, 14), 34)
+    for row in sheet.iter_rows(min_row=2):
+        for cell in row[:6]:
+            cell.fill = PatternFill("solid", fgColor="EEEEEE")
+        for cell in row:
+            if isinstance(cell.value, str):
+                cell.data_type = "s"
+
+    last_row = max(sheet.max_row, 2)
+    dropdowns = {
+        "G": ["是", "否"],
+        "J": list(EMS_ALARM_SEVERITIES.values()),
+        "K": list(EMS_ALARM_VALUE_MODES.values()),
+        "O": category_names,
+        "P": measurement_names,
+        "Q": unit_names,
+        "R": location_names,
+        "T": list(EMS_VALUE_TYPES.values()),
+        "U": list(EMS_AGGREGATION_METHODS.values()),
+        "V": EMS_FLOW_DIRECTIONS,
+    }
+    for column, options in dropdowns.items():
+        validation = DataValidation(type="list", formula1='"' + ",".join(options) + '"', allow_blank=True)
+        validation.error = "請從清單中選擇。"
+        validation.showErrorMessage = True
+        sheet.add_data_validation(validation)
+        validation.add(f"{column}2:{column}{last_row}")
+
+    instructions = workbook.create_sheet("填寫說明")
+    for line in [
+        ["格式版本", "EMS_POINT_CONFIG_V1"],
+        ["用途", "填寫 EMS 點位設定；目前僅提供下載，匯入功能尚未開放。"],
+        ["範圍", "固定匯出所有 UtilityDepartment 點位，不受畫面篩選或分頁影響。"],
+        ["識別欄", "DataSourceId 與外部 Id 用來辨識點位；灰色來源欄位請勿修改。"],
+        ["設定欄", "黃色標題的欄位可編輯，已存在的設定會預先帶入。"],
+        ["空白值", "下限、上限與分類等欄位可留空；保留現有值時請勿清除。"],
+        ["選項欄", "請使用 Excel 下拉選單的文字；連續異常次數須為 1 至 168。"],
+        ["數值欄", "下限、上限及告警解除緩衝須為數字；緩衝不得小於 0。"],
+    ]:
+        instructions.append(line)
+    instructions.column_dimensions["A"].width = 16
+    instructions.column_dimensions["B"].width = 90
+    for cell in instructions[1]:
+        cell.font = Font(bold=True)
+
+    output = BytesIO()
+    workbook.save(output)
+    output.seek(0)
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name=f"ems-point-fill-template-{date.today().isoformat()}.xlsx",
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+
 @app.route("/fill", methods=["GET", "POST"])
 def fill_report():
     guard = login_required()
@@ -2156,6 +2375,55 @@ def report_filters() -> tuple[str, str, str, str]:
     if mode == "all":
         return "", "", "", ""
     raise ValueError("查詢方式不正確，請重新選擇。")
+
+
+@app.route("/api/energy-monthly-data", methods=["GET"])
+def energy_monthly_data_api():
+    expected_key = os.environ.get("ENERGY_API_KEY", "")
+    if not expected_key:
+        return jsonify({"error": "API is not configured"}), 503
+    if not hmac.compare_digest(request.headers.get("X-API-Key", ""), expected_key):
+        return jsonify({"error": "Unauthorized"}), 401
+
+    anchor_month = request.args.get("month", "").strip() or current_report_month()
+    if not valid_report_month(anchor_month):
+        return jsonify({"error": "month must use YYYY-MM"}), 400
+    try:
+        start_month = shift_report_month(anchor_month, -3)
+        end_month = shift_report_month(anchor_month, 3)
+    except ValueError:
+        return jsonify({"error": "month is out of range"}), 400
+
+    rows = get_db().execute(
+        """
+        SELECT ee.report_month, a.id AS area_id, a.name AS department,
+               et.api_name, SUM(ee.quantity) AS quantity
+        FROM energy_entries ee
+        JOIN report_submissions rs
+          ON rs.report_month = ee.report_month AND rs.user_id = ee.user_id
+        JOIN areas a ON a.id = ee.area_id
+        JOIN energy_types et ON et.id = ee.energy_type_id
+        WHERE ee.report_month BETWEEN ? AND ?
+          AND rs.status = 'submitted'
+          AND et.api_name <> ''
+        GROUP BY ee.report_month, a.id, et.id
+        ORDER BY ee.report_month, a.display_order, a.id, et.display_order, et.id
+        """,
+        (start_month, end_month),
+    ).fetchall()
+    results = []
+    by_month_area = {}
+    for row in rows:
+        key = (row["report_month"], row["area_id"])
+        if key not in by_month_area:
+            record = {
+                "month": f"{row['report_month']}-01T00:00:00",
+                "department": row["department"],
+            }
+            by_month_area[key] = record
+            results.append(record)
+        by_month_area[key][row["api_name"]] = row["quantity"]
+    return jsonify(results)
 
 
 @app.route("/reports", methods=["GET"])

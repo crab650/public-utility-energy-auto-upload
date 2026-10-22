@@ -35,6 +35,7 @@ A robust, web-based utility data collection and analytics portal designed for co
 * **Safe Automatic Updates:** On application startup, the manifest checksum is compared with the last successful catalog version. Source metadata is updated only when needed, while manually entered EMS settings are preserved.
 * **Admin-only Configuration:** Administrators can search and filter points, enable or disable monitoring, configure upper/lower alarm limits, and classify points by energy type, measurement type, unit, location, equipment, value type, aggregation method, and flow direction.
 * **Bulk Operations and Export:** Selected points can be updated in bulk, and the complete EMS configuration can be exported to Excel.
+* **Offline Fill Template:** Administrators can download an Excel workbook with every UtilityDepartment point, its current EMS settings, editable columns, dropdown choices, and filling instructions. Import of the completed workbook is planned separately.
 
 ---
 
@@ -165,6 +166,27 @@ erDiagram
    * **Default Admin Credentials:**
      * **Username:** `admin`
      * **Password:** `1234`
+
+New filler and viewer accounts receive the initial password `1234`. On first login, they must set a new password of at least eight characters before accessing reports or data entry. An administrator password reset also requires the user to change that password on the next login. Existing accounts are not forced to change their password when the database is upgraded.
+
+### Monthly Energy Data API
+
+Set `ENERGY_API_KEY` to a long, random secret in the web application's environment. The API returns 503 until this is configured. Call `GET /api/energy-monthly-data` with the `X-API-Key` request header. An optional `month=YYYY-MM` query parameter changes the center month; by default it uses the current month in Bangkok time. The response includes records from three months before through three months after the center month, inclusive. Months without submitted data have no records.
+
+Each JSON array item represents one report month and area. `month` uses the first day of the month as `YYYY-MM-01T00:00:00`, and `department` is the area name. Energy quantities appear as top-level numeric properties named by each energy type's configured **API 名稱**. Energy types without an API name are omitted. Amounts are not exposed. Only submitted reports are included; quantities from multiple fillers for the same month, area, and energy type are summed.
+
+Example request:
+
+```http
+GET /api/energy-monthly-data?month=2026-10
+X-API-Key: YOUR_SECRET
+```
+
+Example response:
+
+```json
+[{"month":"2026-09-01T00:00:00","department":"Poly 51","electricity":12345.0}]
+```
 
 ### Refreshing the Utility Point Catalog
 

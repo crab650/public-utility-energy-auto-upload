@@ -144,16 +144,20 @@
 <section class="panel">
     <div class="query-result-heading">
         <h2>目前結果：{{ total_rows }} 筆</h2>
-        <a class="button secondary" href="{{ url_for('export_ems_points', **filters) }}">匯出目前結果</a>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <a class="button secondary" href="{{ url_for('export_ems_points', **filters) }}">匯出目前結果</a>
+            <a class="button secondary" href="{{ url_for('export_ems_point_template') }}">下載 EMS 設定填寫表</a>
+        </div>
     </div>
     <div class="query-chips">
         {% for label, value in active_filters %}<span class="query-chip">{{ label|label }}：{{ value }}</span>
         {% else %}<span class="muted">未限制條件，顯示全部點位。</span>{% endfor %}
     </div>
     <p class="muted">修改條件後請按「套用篩選」；匯出包含目前條件的所有頁面。</p>
+    <p class="muted">填寫表包含所有點位與現有設定，可先在 Excel 中填寫；匯入功能尚未開放。</p>
     <h3>批次修改（僅限勾選的點位）</h3>
     <form id="bulk-form" method="post" action="{{ url_for('bulk_update_ems_points') }}">
-        <input type="hidden" name="return_to" value="{{ request.full_path }}">
+        <input type="hidden" name="return_to" value="{{ request.script_root }}{{ request.full_path }}">
         <div class="ems-bulk">
             <strong><span id="selected-count">0</span> 筆已選取</strong>
             <select name="bulk_category_id" aria-label="批次能源類別">
@@ -251,7 +255,7 @@
 <dialog id="ems-edit-dialog" class="ems-dialog">
     <div class="ems-dialog-title"><span>編輯 EMS 點位設定</span><button id="close-dialog" type="button" aria-label="關閉">×</button></div>
     <form id="ems-edit-form" method="post">
-        <input type="hidden" name="return_to" value="{{ request.full_path }}">
+        <input type="hidden" name="return_to" value="{{ request.script_root }}{{ request.full_path }}">
         <div class="ems-dialog-body">
             <div id="ems-validation" class="ems-validation"></div>
             <div class="ems-source-card">
